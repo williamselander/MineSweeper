@@ -89,8 +89,8 @@ public class Board {
 
     public void openSquare(int row, int col) {
         Square squareToOpen = gameBoard[row][col];
-        // Om den redan är öppnad
-        if (squareToOpen.isOpen()) {
+        // Om den redan är öppnad eller flaggad
+        if (squareToOpen.isOpen() || squareToOpen.isFlagged()) {
             return;
         }
         squareToOpen.setAsOpen();
@@ -107,6 +107,8 @@ public class Board {
     public boolean isSquareFlagged(int row, int col) {
         return gameBoard[row][col].isFlagged();
     }
+
+    public boolean isOpened(int row, int col){return gameBoard[row][col].isOpen();}
 
 
 

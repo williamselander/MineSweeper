@@ -7,14 +7,13 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import model.Board;
 import presentation.Controller;
-import service.BoardService;
+
 
 public class MinesweeperApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Board board = new Board();
-        BoardService boardService = new BoardService(board);
-        Controller controller = new Controller(boardService);
+        Controller controller = new Controller(board);
 
         GridPane box = createBox();
         box.getChildren().addAll(controller.getBoardView());

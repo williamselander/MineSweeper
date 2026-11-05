@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.layout.*;
+import javafx.scene.image.*;
 import model.Square;
 
 import java.util.function.BiConsumer;
@@ -13,7 +14,6 @@ import java.util.function.Supplier;
 public class BoardView extends VBox {
     private final BiConsumer<Integer, Integer> onSquareClick;
     private final BiConsumer<Integer, Integer> onFlagClick;
-    private final BiFunction<Integer, Integer, Square> getSquare;
     private final Supplier<Boolean> isActive;
     private final BiFunction<Integer, Integer, Boolean> isSquareFlagged;
 
@@ -24,13 +24,11 @@ public class BoardView extends VBox {
     public BoardView(
             BiConsumer<Integer, Integer> onSquareClick,
             BiConsumer<Integer, Integer> onFlagClick,
-            BiFunction<Integer, Integer, Square> getSquare,
             Supplier<Boolean> isActive,
             BiFunction<Integer, Integer, Boolean> isSquareFlagged
     ){
         this.onSquareClick = onSquareClick;
         this.onFlagClick = onFlagClick;
-        this.getSquare = getSquare;
         this.isActive = isActive;
         this.isSquareFlagged = isSquareFlagged;
         this.setAlignment(Pos.CENTER);
@@ -43,20 +41,75 @@ public class BoardView extends VBox {
         createGrid();
     }
 
+    public void updateBoard(Square[][] board) {
+
+        //Loopa igenom nya board
+        for (Square[] row : board) {
+            for (Square col : row) {
+
+
+
+
+
+            }
+
+
+        }
+
+
+    }
+
     private HBox createInfoBox(){
         HBox box = new HBox(10);
         HBox flag = createFlag();
+        HBox smiley = createSmiley();
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
-        box.getChildren().addAll(flag);
+        box.getChildren().addAll(flag, smiley);
         return box;
+    }
+
+    private HBox createSmiley(){
+        HBox smiley = new HBox();
+        smiley.setAlignment(Pos.CENTER);
+        smiley.setMinSize(60,60);
+        smiley.setPadding(new Insets(6));
+        smiley.setPrefSize(60,60);
+        if (isActive.get()) {
+            createHappySmiley(smiley);
+        } else createSadSmiley(smiley);
+        return smiley;
+    }
+
+    private void createHappySmiley(HBox box) {
+        box.setStyle("""
+                         -fx-background-color: #bdbdbd;
+                         -fx-background-image: url('assets/happy.png');
+                         -fx-background-repeat: no-repeat;
+                         -fx-background-position: center;
+                          -fx-background-size: contain;
+                          -fx-border-width: 3px;
+                          -fx-border-color: white #7b7b7b #7b7b7b white;
+                         """);
+    }
+    private void createSadSmiley(HBox box) {
+        box.setStyle("""
+                         -fx-background-color: #bdbdbd;
+                         -fx-background-image: url('assets/happy.png');
+                         -fx-background-repeat: no-repeat;
+                         -fx-background-position: center;
+                          -fx-background-size: contain;
+                          -fx-border-width: 3px;
+                          -fx-border-color: white #7b7b7b #7b7b7b white;
+                         """);
+
     }
 
     private HBox createFlag(){
         HBox flag = new HBox();
         flag.setAlignment(Pos.CENTER);
-        flag.setMinSize(45,45);
-        flag.setPrefSize(45,45);
+        flag.setMinSize(60,60);
+        flag.setPrefSize(60,60);
         setFlagStyleNotClicked(flag);
         flag.setCursor(Cursor.HAND);
         flag.setOnMouseClicked(event -> {
