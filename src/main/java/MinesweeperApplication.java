@@ -18,12 +18,27 @@ public class MinesweeperApplication extends Application {
         Controller controller = new Controller(board);
 
         BorderPane root = new BorderPane();
-        GridPane desktop = createBox();
-        desktop.add(controller.getBoardView(), 0,0);
+        BorderPane desktop = createBox();
+        VBox desktopsIcons = createIcons();
+
+        StackPane gameArea = new StackPane(controller.getBoardView());
+        controller.getBoardView().setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        desktop.setCenter(gameArea);
+        desktop.setLeft(desktopsIcons);
+        BorderPane.setAlignment(desktopsIcons, Pos.TOP_LEFT);
+        BorderPane.setMargin(desktopsIcons, new Insets(80,20,20,20));
         root.setCenter(desktop);
         root.setBottom(createBottom());
 
-        Scene scene = new Scene(root, 800, 800);
+        Scene scene = new Scene(root, 900, 900);
+
+        desktopsIcons.visibleProperty().bind(
+                scene.widthProperty().greaterThan(1000)
+        );
+        desktopsIcons.managedProperty().bind(
+                desktopsIcons.visibleProperty()
+        );
+
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("style.css")).toExternalForm());
 
         primaryStage.setTitle("Minesweeper");
@@ -31,8 +46,36 @@ public class MinesweeperApplication extends Application {
         primaryStage.show();
     }
 
-    private static GridPane createBox() {
-        GridPane box = new GridPane();
+    private static VBox createIcons(){
+        VBox box = new VBox(15);
+        box.setAlignment(Pos.TOP_CENTER);
+        box.setFillWidth(false);
+        box.getChildren().addAll(
+                createIcon("paint.png"),
+                createIcon("RecycleBin.png"),
+                createIcon("myComputer.png"),
+                createIcon("neighbour.png")
+        );
+        return box;
+    }
+
+    private static Region createIcon(String fileName) {
+        Region icon = new Region();
+        icon.setMinSize(68, 68);
+        icon.setPrefSize(68, 68);
+        icon.setMaxSize(68, 68);
+        Image image = new Image(Objects.requireNonNull(
+                MinesweeperApplication.class.getResource("/assets/" + fileName)
+        ).toExternalForm());
+        icon.setBackground(new Background(new BackgroundImage(
+                image, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
+        )));
+        return icon;
+    }
+    private static BorderPane createBox() {
+        BorderPane box = new BorderPane();
         Image image = new Image("assets/background.jpg");
         BackgroundImage backgroundImage = new BackgroundImage(
                 image,
@@ -45,7 +88,7 @@ public class MinesweeperApplication extends Application {
                 )
         );
         box.setBackground(new Background(backgroundImage));
-        box.setAlignment(Pos.CENTER);
+
         return box;
     }
 
@@ -68,3 +111,4 @@ public class MinesweeperApplication extends Application {
         return box;
     }
 }
+

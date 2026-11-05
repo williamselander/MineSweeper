@@ -33,12 +33,29 @@ public class BoardView extends VBox {
         this.onSquareClick = onSquareClick;
         this.onFlagClick = onFlagClick;
         this.onRestartGame = onRestartGame;
+        this.setSpacing(15);
         this.setAlignment(Pos.CENTER);
-        this.setPadding(new Insets(40, 20, 20, 20));
-        this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 4px; -fx-border-color: #808080 #808080 #808080 #808080");
+        this.setPadding(new Insets(0, 20, 20, 20));
+        this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 5px; -fx-border-color: white #7b7b7b #7b7b7b white");
         HBox infoBox = createInfoBox();
-        this.getChildren().addAll(infoBox,gridPane);
+        HBox settings =createSettings();
+        HBox top = new HBox(2);
+        top.setStyle("-fx-background-image: url('assets/top.png'); -fx-background-repeat: no-repeat; -fx-background-position: center; -fx-background-size: 100% 100%");
+        top.setMinHeight(40);
+        top.setPrefHeight(40);
+        top.setMaxHeight(40);
+        this.getChildren().addAll(top,settings,infoBox,gridPane);
         createGrid();
+    }
+
+    private HBox createSettings(){
+        HBox box = new HBox(10);
+        Label game = new Label("Game");
+        game.setStyle("-fx-font-family: 'Microsoft Sans Serif'; -fx-font-size: 17px; -fx-text-fill: black; -fx-font-weight: normal; -fx-background-color: c0c0c0; -fx-border-color: transparen; -fx-border-width: 1px");
+        Label help = new Label("Help");
+        help.setStyle("-fx-font-family: 'Microsoft Sans Serif'; -fx-font-size: 17px; -fx-text-fill: black; -fx-font-weight: normal; -fx-background-color: c0c0c0; -fx-border-color: transparen; -fx-border-width: 1px");
+        box.getChildren().addAll(game, help);
+        return box;
     }
 
     public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
@@ -84,6 +101,11 @@ public class BoardView extends VBox {
 
     private HBox createInfoBox(){
         HBox box = new HBox(10);
+        box.setStyle("""
+                -fx-border-width: 5px;
+
+                -fx-border-color:  white #7b7b7b #7b7b7b white;
+                """);
         HBox flag = createFlag();
         smiley = createSmiley();
         HBox countBox = createMineCounter();
