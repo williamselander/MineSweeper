@@ -20,6 +20,7 @@ public class Square {
 
     public void setAsOpen(){
         this.isOpen = true;
+        System.out.println("Öppnar");
     }
 
     public void setFlagged(){
@@ -33,6 +34,8 @@ public class Square {
     public void setMinesAround(int minesAround) {
         this.minesAround = minesAround;
     }
+
+
 
     public int getRow() {
         return row;

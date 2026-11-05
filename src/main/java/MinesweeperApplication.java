@@ -1,5 +1,4 @@
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -7,6 +6,8 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import model.Board;
 import presentation.Controller;
+
+import java.util.Objects;
 
 
 public class MinesweeperApplication extends Application {
@@ -19,6 +20,7 @@ public class MinesweeperApplication extends Application {
         box.getChildren().addAll(controller.getBoardView());
 
         Scene scene = new Scene(box, 800, 800);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("style.css")).toExternalForm());
 
         primaryStage.setTitle("Minesweeper");
         primaryStage.setScene(scene);

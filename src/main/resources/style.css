@@ -1,0 +1,19 @@
+@font-face {
+    font-family: 'DigitalCounter';
+    src: url("fonts/scoreBoard.ttf");
+}
+
+.mine-counter {
+    -fx-font-family: "Seven Segment";
+    -fx-font-size: 38px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff0000;
+    -fx-background-color: #000000;
+    -fx-padding: 3px;
+    -fx-min-width: 80px;
+    -fx-alignment: center;
+
+    -fx-border-color: #808080 #ffffff #ffffff #808080;
+    -fx-border-width: 2px;
+
+}

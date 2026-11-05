@@ -1,5 +1,7 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Board {
@@ -48,17 +50,18 @@ public class Board {
     private void setMinesAround(){
         for (int row = 0; row < 16 ; row++) {
             for (int col = 0; col < 16 ; col++) {
-                gameBoard[row][col].setMinesAround(findMinesAround(row, col));
+                var adjacentSquares = getAdjacentSquares(row, col);
+                gameBoard[row][col].setMinesAround(Math.toIntExact(findMinesAround(adjacentSquares)));
             }
         }
     }
 
-    public Square getSquare(int row, int col) {
-        return gameBoard[row][col];
+    private Long findMinesAround(List<Square> adjecentSquares) {
+        return adjecentSquares.stream().filter(Square::isHasMine).count();
     }
 
-    private int findMinesAround(int row, int col){
-        int minesAround = 0;
+    private List<Square> getAdjacentSquares(int row, int col){
+        List<Square> adjacentSquares = new ArrayList<>();
 
         int startRow = Math.max(0, row -1);
         int endRow = Math.min(gameBoard.length - 1, row + 1);
@@ -72,20 +75,58 @@ public class Board {
                 if (r == row && c == col) {
                     continue;
                 }
-                if (gameBoard[r][c].isHasMine()) {
-                    minesAround++;
-                }
+                adjacentSquares.add(gameBoard[r][c]);
             }
         }
-        return minesAround;
+        return adjacentSquares;
     }
 
     private boolean hasMine(){
-        // 10% chans för en mina
-        return random.nextDouble() < 0.10;
+        // 7% chans för en mina
+        return random.nextDouble() < 0.07;
+    }
+
+
+    public void reveal(int row, int col) {
+        Square square = gameBoard[row][col];
+        if (square.isOpen() || square.isFlagged()) {
+            return;
+        }
+        square.setAsOpen();
+        if (square.getMinesAround() == 0) {
+            List<Square> adjacentSquares = getAdjacentSquares(row, col);
+
+            for (Square adjacent: adjacentSquares) {
+                reveal(adjacent.getRow(), adjacent.getCol());
+            }
+        }
     }
 
     public boolean isHasWon(){return hasWon;}
+
+    public int getTotalMines(){
+        int totalMines = 0;
+        for (Square[] row: gameBoard) {
+            for (Square col: row) {
+                if (col.isHasMine()) {
+                    totalMines++;
+                }
+            }
+        }
+        return totalMines - getTotalFlaggedMines();
+    }
+
+    private int getTotalFlaggedMines(){
+        int totalFlagged = 0;
+        for (Square[] row: gameBoard) {
+            for (Square col: row) {
+                if (col.isFlagged()) {
+                    totalFlagged++;
+                }
+            }
+        }
+        return totalFlagged;
+    }
 
     public void openSquare(int row, int col) {
         Square squareToOpen = gameBoard[row][col];
@@ -104,11 +145,6 @@ public class Board {
         square.setFlagged();
     }
 
-    public boolean isSquareFlagged(int row, int col) {
-        return gameBoard[row][col].isFlagged();
-    }
-
-    public boolean isOpened(int row, int col){return gameBoard[row][col].isOpen();}
 
 
 

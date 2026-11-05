@@ -20,25 +20,24 @@ public class Controller {
     // Den första man klickar på får ej vara en mina.
     // Rutan får ej öppnas om den är flaggad
     // Börja sätta ut spelplanen här kanske???
-    public Square[][] handleSquareClick(int row, int col){
+    public void handleSquareClick(int row, int col){
         if (board.getOpenedSquares() == 0) {
             startGame(row, col);
-            board.openSquare(row, col);
-        } else board.openSquare(row, col);
-        return getBoard();
+            board.reveal(row, col);
+            boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines());
+        } else {
+            board.reveal(row, col);
+            boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines());
+        }
     }
 
     public void handleFlagClick(int row, int col){
         board.flagSquare(row, col);
+        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines());
     }
-
-
-
-
 
     public BoardView getBoardView(){return boardView;}
 
-    private Square[][] getBoard(){return board.getBoard();}
 
 
 

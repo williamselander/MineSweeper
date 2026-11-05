@@ -1,73 +1,93 @@
 package presentation;
 
+import com.sun.source.tree.NewClassTree;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.image.*;
+import javafx.scene.text.Font;
 import model.Square;
 
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 public class BoardView extends VBox {
     private final BiConsumer<Integer, Integer> onSquareClick;
     private final BiConsumer<Integer, Integer> onFlagClick;
-    private final Supplier<Boolean> isActive;
-    private final BiFunction<Integer, Integer, Boolean> isSquareFlagged;
-
+    private StackPane[][] squareViews = new StackPane[16][16];
+    private boolean isActive = false;
+    private Label counter = new Label("0");
 
     private final GridPane gridPane = new GridPane();
     private boolean flaggedClicked = false;
 
     public BoardView(
             BiConsumer<Integer, Integer> onSquareClick,
-            BiConsumer<Integer, Integer> onFlagClick,
-            Supplier<Boolean> isActive,
-            BiFunction<Integer, Integer, Boolean> isSquareFlagged
+            BiConsumer<Integer, Integer> onFlagClick
     ){
         this.onSquareClick = onSquareClick;
         this.onFlagClick = onFlagClick;
-        this.isActive = isActive;
-        this.isSquareFlagged = isSquareFlagged;
         this.setAlignment(Pos.CENTER);
         this.setPadding(new Insets(40, 20, 20, 20));
         this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 4px; -fx-border-color: #808080 #808080 #808080 #808080");
         HBox infoBox = createInfoBox();
-
-
         this.getChildren().addAll(infoBox,gridPane);
         createGrid();
     }
 
-    public void updateBoard(Square[][] board) {
-
+    public void updateBoard(Square[][] board, boolean isActive, int totalMines) {
+        this.isActive = isActive;
+        updateCounter(totalMines);
+        System.out.println(totalMines);
         //Loopa igenom nya board
-        for (Square[] row : board) {
-            for (Square col : row) {
-
-
-
-
-
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length ; col++) {
+                Square square = board[row][col];
+                if (square.isFlagged()) {
+                    squareViews[row][col].setStyle("""
+                        -fx-background-color: #bdbdbd;
+                        -fx-border-color: white #7b7b7b #7b7b7b white;
+                        -fx-border-width: 3px;
+                        -fx-background-image: url("assets/Flag.png");
+                        -fx-background-repeat: no-repeat;
+                        -fx-background-position: center;
+                        -fx-background-size: contain;
+                        """);
+                } else if (square.isOpen()) {
+                    setSquareClickedStyle(squareViews[row][col]);
+                } else {
+                    setSquareStandardStyle(squareViews[row][col]);
+                }
             }
-
-
         }
-
-
     }
 
     private HBox createInfoBox(){
         HBox box = new HBox(10);
         HBox flag = createFlag();
         HBox smiley = createSmiley();
+        HBox countBox = createMineCounter();
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
-        box.getChildren().addAll(flag, smiley);
+        box.getChildren().addAll(countBox,flag, smiley);
         return box;
     }
+
+    private void updateCounter(int count){
+        counter.setText(String.valueOf(count));
+    }
+
+    private HBox createMineCounter(){
+        HBox countBox = new HBox();
+        countBox.setAlignment(Pos.CENTER);
+        countBox.setMinSize(120,60);
+        countBox.setPrefSize(120,60);
+        countBox.setStyle(" -fx-background-color: #bdbdbd; -fx-border-width: 3px; -fx-border-color: white #7b7b7b #7b7b7b white;");
+        counter.getStyleClass().add("mine-counter");
+        countBox.getChildren().add(counter);
+        return countBox;
+    }
+
 
     private HBox createSmiley(){
         HBox smiley = new HBox();
@@ -75,7 +95,7 @@ public class BoardView extends VBox {
         smiley.setMinSize(60,60);
         smiley.setPadding(new Insets(6));
         smiley.setPrefSize(60,60);
-        if (isActive.get()) {
+        if (isActive) {
             createHappySmiley(smiley);
         } else createSadSmiley(smiley);
         return smiley;
@@ -114,7 +134,7 @@ public class BoardView extends VBox {
         flag.setCursor(Cursor.HAND);
         flag.setOnMouseClicked(event -> {
             // Kan inte flagga innan vi har börjat
-            if (Boolean.FALSE.equals(isActive.get())) {
+            if (!isActive) {
                 return;
             }
             flipFlag();
@@ -177,50 +197,16 @@ public class BoardView extends VBox {
                 square.setCursor(Cursor.HAND);
 
                 square.setOnMouseClicked(event -> {
-
                     // Om ej flagga klickat
                     if (!flaggedClicked) {
-                        // Om spelet ej har startat
-                        System.out.println("Spelet har startat?: " + Boolean.FALSE.equals(isActive.get()));
-                        if (Boolean.FALSE.equals(isActive.get())) {
-                            onSquareClick.accept(currentRow, currentCol);
-                            setSquareClickedStyle(square);
-                            return;
-                        }
-                        // Om spelet har startat
-                        System.out.println("Spelet har startat: " + isActive.get());
-
-                        // Om den är flaggad kan den ej aktiveras
-                        System.out.println("Är den flaggad?: " + isSquareFlagged.apply(currentRow, currentCol));
-                        if (isSquareFlagged.apply(currentRow, currentCol)) {
-                            System.out.println("Flaggad!");
-                            return;
-                        }
                         onSquareClick.accept(currentRow, currentCol);
-                        setSquareClickedStyle(square);
                         return;
                     }
-
                     // Om flagga är klickad
-
-                        // Om den har en flagga
-                        if (Boolean.TRUE.equals(isSquareFlagged.apply(currentRow, currentCol))) {
-                            setSquareStandardStyle(square);
-                            onFlagClick.accept(currentRow, currentCol); // Flickar den så att den ej har en flagga
-                            return;
-                        }
-                        // Om den ej har en flagga
-                        square.setStyle("""
-                        -fx-background-color: #bdbdbd;
-                        -fx-border-color: white #7b7b7b #7b7b7b white;
-                        -fx-border-width: 3px;
-                        -fx-background-image: url("assets/Flag.png");
-                        -fx-background-repeat: no-repeat;
-                        -fx-background-position: center;
-                        -fx-background-size: contain;
-                        """);
                         onFlagClick.accept(currentRow, currentCol);
                 });
+
+                squareViews[row][col] = square;
                 gridPane.add(square, col, row);
             }
 
