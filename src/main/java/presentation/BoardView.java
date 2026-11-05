@@ -14,19 +14,25 @@ import java.util.function.BiConsumer;
 public class BoardView extends VBox {
     private final BiConsumer<Integer, Integer> onSquareClick;
     private final BiConsumer<Integer, Integer> onFlagClick;
+    private final Runnable onRestartGame;
     private StackPane[][] squareViews = new StackPane[16][16];
+    private boolean hasWon = false;
+    private boolean hasLost = false;
     private boolean isActive = false;
     private Label counter = new Label("0");
+    private HBox smiley = new HBox();
 
     private final GridPane gridPane = new GridPane();
     private boolean flaggedClicked = false;
 
     public BoardView(
             BiConsumer<Integer, Integer> onSquareClick,
-            BiConsumer<Integer, Integer> onFlagClick
+            BiConsumer<Integer, Integer> onFlagClick,
+            Runnable onRestartGame
     ){
         this.onSquareClick = onSquareClick;
         this.onFlagClick = onFlagClick;
+        this.onRestartGame = onRestartGame;
         this.setAlignment(Pos.CENTER);
         this.setPadding(new Insets(40, 20, 20, 20));
         this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 4px; -fx-border-color: #808080 #808080 #808080 #808080");
@@ -35,15 +41,24 @@ public class BoardView extends VBox {
         createGrid();
     }
 
-    public void updateBoard(Square[][] board, boolean isActive, int totalMines) {
+    public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
         this.isActive = isActive;
+        this.hasWon = hasWon;
+        this.hasLost = hasLost;
         updateCounter(totalMines);
-        System.out.println(totalMines);
+        if (isActive) {
+            createHappySmiley();
+        } else {
+            createSadSmiley();
+        }
+
         //Loopa igenom nya board
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length ; col++) {
                 Square square = board[row][col];
-                if (square.isFlagged()) {
+                if (square.isBlown()) {
+                    setSquareAsBlown(squareViews[row][col]);
+                } else if (square.isFlagged()) {
                     squareViews[row][col].setStyle("""
                         -fx-background-color: #bdbdbd;
                         -fx-border-color: white #7b7b7b #7b7b7b white;
@@ -54,8 +69,13 @@ public class BoardView extends VBox {
                         -fx-background-size: contain;
                         """);
                 } else if (square.isOpen()) {
-                    setSquareClickedStyle(squareViews[row][col]);
-                } else {
+                    if (square.isHasMine()) {
+                        setSquareWithMineStyle(squareViews[row][col]);
+                    } else {
+                        setSquareClickedStyle(squareViews[row][col], square.getMinesAround());
+                    }
+                }
+                else {
                     setSquareStandardStyle(squareViews[row][col]);
                 }
             }
@@ -65,7 +85,7 @@ public class BoardView extends VBox {
     private HBox createInfoBox(){
         HBox box = new HBox(10);
         HBox flag = createFlag();
-        HBox smiley = createSmiley();
+        smiley = createSmiley();
         HBox countBox = createMineCounter();
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
@@ -90,35 +110,43 @@ public class BoardView extends VBox {
 
 
     private HBox createSmiley(){
-        HBox smiley = new HBox();
         smiley.setAlignment(Pos.CENTER);
         smiley.setMinSize(60,60);
         smiley.setPadding(new Insets(6));
         smiley.setPrefSize(60,60);
-        if (isActive) {
-            createHappySmiley(smiley);
-        } else createSadSmiley(smiley);
+        createHappySmiley();
+        smiley.setCursor(Cursor.HAND);
+
+        // Vid restart
+        smiley.setOnMouseClicked(event -> {
+            flaggedClicked = false;
+            hasLost = false;
+            createHappySmiley();
+            counter.setText("0");
+            isActive = true;
+            onRestartGame.run();
+        });
         return smiley;
     }
 
-    private void createHappySmiley(HBox box) {
-        box.setStyle("""
+    private void createHappySmiley() {
+        smiley.setStyle("""
                          -fx-background-color: #bdbdbd;
                          -fx-background-image: url('assets/happy.png');
                          -fx-background-repeat: no-repeat;
                          -fx-background-position: center;
-                          -fx-background-size: contain;
+                          -fx-background-size: 42px 42px;
                           -fx-border-width: 3px;
                           -fx-border-color: white #7b7b7b #7b7b7b white;
                          """);
     }
-    private void createSadSmiley(HBox box) {
-        box.setStyle("""
+    private void createSadSmiley() {
+        smiley.setStyle("""
                          -fx-background-color: #bdbdbd;
-                         -fx-background-image: url('assets/happy.png');
+                         -fx-background-image: url('assets/sad.png');
                          -fx-background-repeat: no-repeat;
                          -fx-background-position: center;
-                          -fx-background-size: contain;
+                          -fx-background-size: 62px 62px;
                           -fx-border-width: 3px;
                           -fx-border-color: white #7b7b7b #7b7b7b white;
                          """);
@@ -180,12 +208,52 @@ public class BoardView extends VBox {
         square.setStyle("-fx-background-color: #bdbdbd;-fx-border-width: 3px ;-fx-border-color: white #7b7b7b #7b7b7b white;");
     }
 
-    private void setSquareClickedStyle(StackPane square){
+    private void setSquareClickedStyle(StackPane square, int minesAround){
+
+        if (minesAround != 0) {
+            Label minesLabel = new Label(String.valueOf(minesAround));
+            switch (minesAround) {
+                case 1 -> minesLabel.getStyleClass().add("mines-1");
+                case 2 -> minesLabel.getStyleClass().add("mines-2");
+                case 3 -> minesLabel.getStyleClass().add("mines-3");
+                case 4 -> minesLabel.getStyleClass().add("mines-4");
+                case 5 -> minesLabel.getStyleClass().add("mines-5");
+                default -> {
+                    return;
+                }
+            }
+            square.getChildren().add(minesLabel);
+        }
         square.setStyle("-fx-background-color: #b6b6b6; -fx-border-color: #8b8b8b; -fx-border-width: 2px");
     }
 
+    private void setSquareAsBlown(StackPane square) {
+        square.setStyle("""
+                        -fx-background-color: #d50b06;
+                         -fx-border-color: #8b8b8b;
+                          -fx-border-width: 2px;
+                          -fx-background-image: url("assets/mine.png");
+                         -fx-background-repeat: no-repeat;
+                         -fx-background-position: center;
+                         -fx-background-size: contain;
+                          """);
+    }
 
-    private void createGrid(){
+    private void setSquareWithMineStyle(StackPane square) {
+        square.setStyle("""
+                        -fx-background-color: #b6b6b6;
+                         -fx-border-color: #8b8b8b;
+                         -fx-border-width: 2px;
+                         -fx-background-image: url("assets/mine.png");
+                         -fx-background-repeat: no-repeat;
+                         -fx-background-position: center;
+                         -fx-background-size: contain;
+                        """);
+    }
+
+
+    public void createGrid(){
+        gridPane.getChildren().clear();
         for (int row = 0; row < 16; row++) {
             for (int col = 0; col  < 16 ; col++) {
                 int currentRow = row;
@@ -197,6 +265,9 @@ public class BoardView extends VBox {
                 square.setCursor(Cursor.HAND);
 
                 square.setOnMouseClicked(event -> {
+                    if (hasLost) {
+                        return;
+                    }
                     // Om ej flagga klickat
                     if (!flaggedClicked) {
                         onSquareClick.accept(currentRow, currentCol);

@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -16,10 +17,13 @@ public class MinesweeperApplication extends Application {
         Board board = new Board();
         Controller controller = new Controller(board);
 
-        GridPane box = createBox();
-        box.getChildren().addAll(controller.getBoardView());
+        BorderPane root = new BorderPane();
+        GridPane desktop = createBox();
+        desktop.add(controller.getBoardView(), 0,0);
+        root.setCenter(desktop);
+        root.setBottom(createBottom());
 
-        Scene scene = new Scene(box, 800, 800);
+        Scene scene = new Scene(root, 800, 800);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("style.css")).toExternalForm());
 
         primaryStage.setTitle("Minesweeper");
@@ -42,6 +46,25 @@ public class MinesweeperApplication extends Application {
         );
         box.setBackground(new Background(backgroundImage));
         box.setAlignment(Pos.CENTER);
+        return box;
+    }
+
+    private static HBox createBottom(){
+        HBox box = new HBox(10);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(4));
+        box.setStyle("""
+        -fx-background-color: #bfb9be;
+        -fx-border-color: white transparent transparent transparent;
+        -fx-border-width: 2px;
+        """);
+
+        HBox startBtn = new HBox();
+        startBtn.setPrefSize(90,32);
+        startBtn.setMinSize(90,31);
+        startBtn.setMaxSize(90,32);
+        startBtn.setStyle("-fx-background-image: url('assets/StartButton.jpg'); -fx-background-size: contain; -fx-background-position: center; -fx-background-repeat: no-repeat");
+        box.getChildren().addAll(startBtn);
         return box;
     }
 }

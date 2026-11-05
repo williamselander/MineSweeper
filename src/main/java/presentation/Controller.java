@@ -10,7 +10,7 @@ public class Controller {
 
     public Controller(Board board){
         this.board = board;
-        this.boardView = new BoardView(this::handleSquareClick, this::handleFlagClick);
+        this.boardView = new BoardView(this::handleSquareClick, this::handleFlagClick, this::handleRestartGame);
     }
 
     private void startGame(int row, int col){
@@ -23,17 +23,22 @@ public class Controller {
     public void handleSquareClick(int row, int col){
         if (board.getOpenedSquares() == 0) {
             startGame(row, col);
-            board.reveal(row, col);
-            boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines());
-        } else {
-            board.reveal(row, col);
-            boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines());
         }
-    }
+        board.reveal(row, col);
+        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines(), board.isHasWon(), board.isHasLost());
+        }
+
 
     public void handleFlagClick(int row, int col){
         board.flagSquare(row, col);
-        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines());
+        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines(), board.isHasWon(), board.isHasLost());
+    }
+
+    public void handleRestartGame(){
+        board.clearOpenedSquares();
+        board.setHasWonAsFalse();
+        boardView.createGrid();
+
     }
 
     public BoardView getBoardView(){return boardView;}

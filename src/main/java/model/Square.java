@@ -7,6 +7,7 @@ public class Square {
     private boolean isOpen;
     private boolean isFlagged;
     private int minesAround;
+    private boolean blown;
 
 
     public Square(int row, int col, boolean hasMine){
@@ -16,6 +17,7 @@ public class Square {
         this.isOpen = false;
         this.isFlagged = false;
         this.minesAround = 0; // Antalet minor runt är 0 vid instansering
+        this.blown = false;
     }
 
     public void setAsOpen(){
@@ -29,6 +31,14 @@ public class Square {
         this.isFlagged = !isFlagged;
 
         System.out.println("Efter: " + isFlagged);
+    }
+
+    public void setAsBlown(){
+        this.blown = true;
+    }
+
+    public boolean isBlown(){
+        return this.blown;
     }
 
     public void setMinesAround(int minesAround) {
