@@ -56,8 +56,8 @@ public class Board {
         }
     }
 
-    private Long findMinesAround(List<Square> adjecentSquares) {
-        return adjecentSquares.stream().filter(Square::isHasMine).count();
+    private Long findMinesAround(List<Square> adjacentSquares) {
+        return adjacentSquares.stream().filter(Square::isHasMine).count();
     }
 
     private List<Square> getAdjacentSquares(int row, int col){
