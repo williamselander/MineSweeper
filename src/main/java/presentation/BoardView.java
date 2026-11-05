@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import model.Square;
@@ -23,8 +24,6 @@ public class BoardView extends VBox {
     private HBox smiley = new HBox();
 
     private final GridPane gridPane = new GridPane();
-    private boolean flaggedClicked = false;
-
     public BoardView(
             BiConsumer<Integer, Integer> onSquareClick,
             BiConsumer<Integer, Integer> onFlagClick,
@@ -106,12 +105,11 @@ public class BoardView extends VBox {
 
                 -fx-border-color:  white #7b7b7b #7b7b7b white;
                 """);
-        HBox flag = createFlag();
         smiley = createSmiley();
         HBox countBox = createMineCounter();
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
-        box.getChildren().addAll(countBox,flag, smiley);
+        box.getChildren().addAll(countBox, smiley);
         return box;
     }
 
@@ -141,7 +139,6 @@ public class BoardView extends VBox {
 
         // Vid restart
         smiley.setOnMouseClicked(event -> {
-            flaggedClicked = false;
             hasLost = false;
             createHappySmiley();
             counter.setText("0");
@@ -175,56 +172,6 @@ public class BoardView extends VBox {
 
     }
 
-    private HBox createFlag(){
-        HBox flag = new HBox();
-        flag.setAlignment(Pos.CENTER);
-        flag.setMinSize(60,60);
-        flag.setPrefSize(60,60);
-        setFlagStyleNotClicked(flag);
-        flag.setCursor(Cursor.HAND);
-        flag.setOnMouseClicked(event -> {
-            // Kan inte flagga innan vi har börjat
-            if (!isActive) {
-                return;
-            }
-            flipFlag();
-            if (!flaggedClicked) {
-                setFlagStyleNotClicked(flag);
-                return;
-            }
-            setFlagStyleClicked(flag);
-        });
-
-        return flag;
-    }
-
-    private void flipFlag(){
-        this.flaggedClicked = !flaggedClicked;
-    }
-
-    private void setFlagStyleNotClicked(HBox flag) {
-        flag.setStyle("""
-                         -fx-background-color: #bdbdbd;
-                         -fx-background-image: url('assets/Flag.png');
-                         -fx-background-repeat: no-repeat;
-                         -fx-background-position: center;
-                          -fx-background-size: contain;
-                          -fx-border-width: 3px;
-                          -fx-border-color: white #7b7b7b #7b7b7b white;
-                         """);
-    }
-
-    private void setFlagStyleClicked(HBox flag) {
-        flag.setStyle("""
-                         -fx-background-color: #a0a0a0;
-                         -fx-background-image: url('assets/Flag.png');
-                         -fx-background-repeat: no-repeat;
-                         -fx-background-position: center;
-                          -fx-background-size: contain;
-                          -fx-border-width: 3px;
-                          -fx-border-color:  #7b7b7b white  white #7b7b7b;
-                         """);
-    }
 
     private void setSquareStandardStyle(StackPane square) {
         square.setStyle("-fx-background-color: #bdbdbd;-fx-border-width: 3px ;-fx-border-color: white #7b7b7b #7b7b7b white;");
@@ -291,10 +238,11 @@ public class BoardView extends VBox {
                         return;
                     }
                     // Om ej flagga klickat
-                    if (!flaggedClicked) {
+                    if (event.getButton() == MouseButton.PRIMARY) {
                         onSquareClick.accept(currentRow, currentCol);
                         return;
                     }
+
                     // Om flagga är klickad
                         onFlagClick.accept(currentRow, currentCol);
                 });
