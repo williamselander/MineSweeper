@@ -22,12 +22,12 @@ public class Square {
         this.isOpen = true;
     }
 
-    public void setAsFlagged(){
-        this.isFlagged = true;
-    }
+    public void setFlagged(){
+        System.out.println("Innan: " + isFlagged);
 
-    public void setAsUnflagged(){
-        this.isFlagged = false;
+        this.isFlagged = !isFlagged;
+
+        System.out.println("Efter: " + isFlagged);
     }
 
     public void setMinesAround(int minesAround) {
