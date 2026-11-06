@@ -17,6 +17,8 @@
     -fx-border-width: 2px;
 }
 
+
+
 .mines-1 {
     -fx-text-fill: #0000ff;
     -fx-font-family: MS sans-serif;
@@ -50,4 +52,66 @@
     -fx-font-family: MS sans-serif;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
+}
+
+.menu-bar {
+    -fx-background-color: #bdbdbd; -fx-background-insets: 0; -fx-padding: 1px 2px; -fx-font-family: 'Microsoft Sans Serif'; -fx-font-size: 16px; -fx-background-radius: 0
+}
+
+.menu-bar .label,
+.context-menu .label {
+    -fx-font-family: "Microsoft Sans Serif";
+    -fx-font-size: 17px;
+    -fx-font-weight: normal;
+    -fx-text-fill: black;
+}
+
+.menu-bar .menu-button:hover {
+    -fx-background-color: #b0a9a9;
+}
+
+.menu-bar .menu-button {
+    -fx-background-color: #bdbdbd;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 6px 14px;
+    -fx-border-width: 1px;
+    -fx-border-color: transparent;
+}
+
+.menu-bar .menu-button:showing {
+    -fx-border-color: #818181 white #818181 white;
+    -fx-border-width: 1px;
+}
+
+.context-menu {
+    -fx-background-color: #c3c3c3;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: white #404040 #404040 white;
+    -fx-border-width: 2px;
+    -fx-padding: 2px;
+    -fx-effect: null;
+}
+.menu-bar .menu-button:hover,
+.menu-bar .menu-button:showing {
+    -fx-background-color: transparent;
+}
+
+.menu-item {
+    -fx-background-radius: 0;
+    -fx-padding: 3px 18px 3px 8px;
+}
+
+.menu-item:focused {
+    -fx-background-color: #a29e9e;
+}
+
+.context-menu .separator {
+    -fx-padding: 3px 2px;
+}
+
+.context-menu .separator .line {
+    -fx-border-color: #808080 transparent transparent transparent;
+    -fx-border-width: 1px 0 1px 0;
 }

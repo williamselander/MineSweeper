@@ -1,10 +1,11 @@
 package presentation;
 
 import com.sun.source.tree.NewClassTree;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
@@ -22,6 +23,7 @@ public class BoardView extends VBox {
     private boolean isActive = false;
     private Label counter = new Label("0");
     private HBox smiley = new HBox();
+    private ToggleGroup difficulty = new ToggleGroup();
 
     private final GridPane gridPane = new GridPane();
     public BoardView(
@@ -37,7 +39,7 @@ public class BoardView extends VBox {
         this.setPadding(new Insets(0, 20, 20, 20));
         this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 5px; -fx-border-color: white #7b7b7b #7b7b7b white");
         HBox infoBox = createInfoBox();
-        HBox settings =createSettings();
+        MenuBar settings =createSettings();
         HBox top = new HBox(2);
         top.setStyle("-fx-background-image: url('assets/top.png'); -fx-background-repeat: no-repeat; -fx-background-position: center; -fx-background-size: 100% 100%");
         top.setMinHeight(40);
@@ -47,15 +49,59 @@ public class BoardView extends VBox {
         createGrid();
     }
 
-    private HBox createSettings(){
-        HBox box = new HBox(10);
-        Label game = new Label("Game");
-        game.setStyle("-fx-font-family: 'Microsoft Sans Serif'; -fx-font-size: 17px; -fx-text-fill: black; -fx-font-weight: normal; -fx-background-color: c0c0c0; -fx-border-color: transparen; -fx-border-width: 1px");
-        Label help = new Label("Help");
-        help.setStyle("-fx-font-family: 'Microsoft Sans Serif'; -fx-font-size: 17px; -fx-text-fill: black; -fx-font-weight: normal; -fx-background-color: c0c0c0; -fx-border-color: transparen; -fx-border-width: 1px");
-        box.getChildren().addAll(game, help);
-        return box;
+
+    public MenuBar createSettings() {
+        MenuItem newGame = new MenuItem("New");
+        newGame.setOnAction(event -> onRestartGame.run());
+
+        RadioMenuItem beginner = new RadioMenuItem("Beginner");
+        RadioMenuItem intermediate = new RadioMenuItem("Intermediate");
+        RadioMenuItem expert = new RadioMenuItem("Expert");
+
+        beginner.setToggleGroup(difficulty);
+        intermediate.setToggleGroup(difficulty);
+        expert.setToggleGroup(difficulty);
+        intermediate.setSelected(true);
+
+        MenuItem bestTimes = new MenuItem("Best Times");
+        MenuItem exit = new MenuItem("Exit");
+        exit.setOnAction(event -> Platform.exit());
+
+        Menu game = new Menu("Game");
+        game.getItems().addAll(
+                newGame,
+                new SeparatorMenuItem(),
+                beginner,
+                intermediate,
+                expert,
+                new SeparatorMenuItem(),
+                bestTimes,
+                exit
+        );
+
+        Menu help = new Menu("Help");
+
+
+        MenuItem firsHelp = new MenuItem("1. Öppna en ruta med vänsterklick för att börja");
+        MenuItem secondHelp = new MenuItem("2. Rutor med siffror har så många minor runt sig");
+        MenuItem thirdHelp = new MenuItem("3. Flagga rutorna som du tror har en mina med högerklick");
+        MenuItem fourthHelp = new MenuItem("4. Ifall du klickar på en ruta med mina har du förlorat och smileyn blir ledsen");
+        MenuItem fifthHelp = new MenuItem("5. Du har vunnit när alla rutor förutom dom flaggade är klickade,\n och du har markerat rätt rutor med minor. Smileyn kommer bli cool");
+        MenuItem lastHelp = new MenuItem("6. Starta om spelet antingen i Game eller genom att klicka på smileyn");
+
+        help.getItems().addAll(
+                firsHelp,
+                secondHelp,
+                thirdHelp,
+                fourthHelp,
+                fifthHelp,
+                lastHelp
+        );
+        return new MenuBar(game, help);
     }
+
+
+
 
     public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
         this.isActive = isActive;
@@ -265,6 +311,25 @@ public class BoardView extends VBox {
 
     public void createGrid(){
         gridPane.getChildren().clear();
+
+        int rows = 16;
+        int cols = 16;
+
+        switch (difficulty.getSelectedToggle().toString()) {
+            case "Beginner" -> {
+                rows = 9;
+                cols = 9;
+            }
+            case "Expert" -> {
+                rows = 30;
+                cols = 16;
+            }
+            default -> {
+                rows = 16;
+                cols = 16;
+            }
+        }
+
         for (int row = 0; row < 16; row++) {
             for (int col = 0; col  < 16 ; col++) {
                 int currentRow = row;
