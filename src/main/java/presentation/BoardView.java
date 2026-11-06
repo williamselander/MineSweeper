@@ -1,5 +1,8 @@
 package presentation;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -7,8 +10,10 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 import model.Square;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 public class BoardView extends VBox {
@@ -17,13 +22,17 @@ public class BoardView extends VBox {
     private final Runnable onRestartGame;
     private StackPane[][] squareViews;
     private boolean hasLost = false;
+    private boolean hasWon = false;
     private final Label counter = new Label("0");
+    private final Timeline timeline = new Timeline();
+    private int maxSeconds = 300;
+    private final Label timer = new Label("05:00");
     private HBox smiley = new HBox();
     private final ToggleGroup difficulty = new ToggleGroup();
     private int rowsBoard;
     private int colsBoard;
-
     private final GridPane gridPane = new GridPane();
+
     public BoardView(
             BiConsumer<Integer, Integer> onSquareClick,
             BiConsumer<Integer, Integer> onFlagClick,
@@ -39,10 +48,14 @@ public class BoardView extends VBox {
         HBox infoBox = createInfoBox();
         MenuBar settings =createSettings();
         HBox top = createTop();
+        gridPane.setAlignment(Pos.CENTER);
 
         this.getChildren().addAll(top,settings,infoBox,gridPane);
         createGrid();
     }
+
+    private void setMaxSeconds(int seconds) {this.maxSeconds = seconds;}
+    private void setHasLost(boolean hasLost){this.hasLost = hasLost;}
 
     private HBox createTop(){
         HBox top = new HBox(5);
@@ -84,6 +97,10 @@ public class BoardView extends VBox {
         -fx-background-position: center;
         -fx-background-size: contain;
         """.formatted(fileName));
+        if (fileName.equals("kryss.png")) {
+            icon.setCursor(Cursor.HAND);
+            icon.setOnMouseClicked(event -> Platform.exit());
+        }
         return icon;
     }
 
@@ -120,14 +137,12 @@ public class BoardView extends VBox {
                 bestTimes,
                 exit
         );
-
         Menu help = new Menu("Help");
-
 
         MenuItem firsHelp = new MenuItem("1. Öppna en ruta med vänsterklick för att börja");
         MenuItem secondHelp = new MenuItem("2. Rutor med siffror har så många minor runt sig");
         MenuItem thirdHelp = new MenuItem("3. Flagga rutorna som du tror har en mina med högerklick");
-        MenuItem fourthHelp = new MenuItem("4. Ifall du klickar på en ruta med mina har du förlorat och smileyn blir ledsen");
+        MenuItem fourthHelp = new MenuItem("4. Ifall du klickar på en ruta med mina eller att tiden går ut har du förlorat ");
         MenuItem fifthHelp = new MenuItem("5. Du har vunnit när alla rutor förutom dom flaggade är klickade,\n och du har markerat rätt rutor med minor. Smileyn kommer bli cool");
         MenuItem lastHelp = new MenuItem("6. Starta om spelet antingen i Game eller genom att klicka på smileyn");
 
@@ -142,8 +157,11 @@ public class BoardView extends VBox {
         return new MenuBar(game, help);
     }
 
+    private void setHasWon(boolean hasWon){this.hasWon = hasWon;}
+
     public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
-        this.hasLost = hasLost;
+        setHasLost(hasLost);
+        setHasWon(hasWon);
         if (hasWon && !hasLost) {
             updateCounter("Win!");
         } else if (!hasWon && hasLost) {
@@ -196,8 +214,6 @@ public class BoardView extends VBox {
                         setSquareStandardStyle(squareViews[row][col]);
                     }
                 }
-
-
             }
         }
     }
@@ -209,25 +225,73 @@ public class BoardView extends VBox {
                 -fx-border-color:  white #7b7b7b #7b7b7b white;
                 """);
         smiley = createSmiley();
-        HBox countBox = createMineCounter();
+        HBox countBox = createCounter(120);
+        countBox.getChildren().add(counter);
+        counter.getStyleClass().add("mine-counter");
+        HBox timerBox = createCounter(140);
+        timerBox.getChildren().add(timer);
+        timer.getStyleClass().add("mine-counter");
+        timer.setMinSize(120,55);
+        timer.setPrefSize(120,55);
+        timer.setMaxSize(120,55);
+        timer.setAlignment(Pos.CENTER);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
-        box.getChildren().addAll(countBox, smiley);
+        box.getChildren().addAll(countBox, smiley, timerBox);
         return box;
+    }
+
+    private void createTimeline(){
+        AtomicInteger elapsedSeconds = new AtomicInteger(0);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.setAutoReverse(false);
+        KeyFrame oneSecond = new KeyFrame(Duration.seconds(1), event -> {
+            int current = elapsedSeconds.incrementAndGet();
+            if (current >= maxSeconds ) {
+                timeline.stop();
+                setHasLost(true);
+                setTimerText(0,0);
+                updateCounter("Lost!");
+                createSadSmiley();
+                return;
+            }
+            if (hasLost || hasWon) {
+                timeline.stop();
+                if (hasWon) {
+                    timeline.stop();
+                } else {
+                    setTimerText(0,0);
+                }
+                return;
+            }
+            setTimerText(maxSeconds, current);
+        });
+        timeline.getKeyFrames().add(oneSecond);
+        timeline.play();
+    }
+
+    private void setTimerText(int maxSeconds, int currentSeconds){
+        int remainingSeconds = maxSeconds-currentSeconds;
+
+        if (remainingSeconds < 0 ) {
+            remainingSeconds = 0;
+        }
+        int minutes = remainingSeconds / 60;
+        int seconds = remainingSeconds % 60;
+        timer.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
     private void updateCounter(String value){
         counter.setText(value);
     }
 
-    private HBox createMineCounter(){
+    private HBox createCounter(int width){
         HBox countBox = new HBox();
         countBox.setAlignment(Pos.CENTER);
-        countBox.setMinSize(120,60);
-        countBox.setPrefSize(120,60);
+        countBox.setMinSize(width,60);
+        countBox.setPrefSize(width,60);
         countBox.setStyle(" -fx-background-color: #bdbdbd; -fx-border-width: 3px; -fx-border-color: white #7b7b7b #7b7b7b white;");
-        counter.getStyleClass().add("mine-counter");
-        countBox.getChildren().add(counter);
+
         return countBox;
     }
 
@@ -353,28 +417,37 @@ public class BoardView extends VBox {
         return this.colsBoard;
     }
 
+    private void setColsBoard(int cols){this.colsBoard = cols;}
+    private void setRowsBoard(int rows){this.rowsBoard = rows;}
+
 
     public void createGrid(){
-        hasLost = false;
-        counter.setText("0");
+        setHasLost(false);
+        setHasWon(false);
+        updateCounter("0");
+        timer.setText("05:00");
+        timeline.stop();
         createHappySmiley();
 
         gridPane.getChildren().clear();
         RadioMenuItem selected = (RadioMenuItem) difficulty.getSelectedToggle();
         switch (selected.getText()) {
             case "Beginner" -> {
-                rowsBoard = 9;
-                colsBoard = 9;
+                setRowsBoard(9);
+                setColsBoard(9);
+                setMaxSeconds(300);
             }
             case "Expert" -> {
-                rowsBoard = 16;
-                colsBoard = 30;
+                setRowsBoard(16);
+                setColsBoard(30);
+                setMaxSeconds(420);
             }
 
             // Default 16*16
             default -> {
-                rowsBoard = 16;
-                colsBoard = 16;
+                setRowsBoard(16);
+                setColsBoard(16);
+                setMaxSeconds(300);
             }
         }
 
@@ -396,6 +469,7 @@ public class BoardView extends VBox {
                     }
                     // Om ej flagga klickat
                     if (event.getButton() == MouseButton.PRIMARY) {
+                        createTimeline(); // Sätter på timern
                         onSquareClick.accept(currentRow, currentCol);
                         return;
                     }
