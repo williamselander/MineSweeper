@@ -16,7 +16,16 @@ public class Board {
         this.hasWon = false;
     }
 
-    public void setAsWon(){
+
+    public void hasPlayerWon(){
+        // ifall totala rutor - antalet minor = opened squares har man vunnit.
+        if (256 - getTotalMines() == openedSquares && !hasLost) {
+            setAsWon();
+        }
+    }
+
+
+    private void setAsWon(){
         this.hasWon = true;
         this.isActive = false;
     }
@@ -28,9 +37,6 @@ public class Board {
     public void setHasWonAsFalse(){
         this.hasWon = false;
     }
-
-
-
 
     public boolean isBlown(int row, int col) {
         return gameBoard[row][col].isBlown();
@@ -156,7 +162,11 @@ public class Board {
                 }
             }
         }
-        return totalMines - getTotalFlaggedMines();
+        return totalMines;
+    }
+
+    public int getTotalMinesForCounter(){
+        return getTotalMines() - getTotalFlaggedMines();
     }
 
     private int getTotalFlaggedMines(){
@@ -187,6 +197,9 @@ public class Board {
         if (!isActive) {
             return;
         }
+        if (!gameBoard[row][col].isFlagged() && getTotalMinesForCounter() - 1 < 0) {
+                return;
+            }
         Square square = gameBoard[row][col];
         square.setFlagged();
     }

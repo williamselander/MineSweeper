@@ -25,20 +25,20 @@ public class Controller {
             startGame(row, col);
         }
         board.reveal(row, col);
-        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines(), board.isHasWon(), board.isHasLost());
+        board.hasPlayerWon();
+        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMinesForCounter(), board.isHasWon(), board.isHasLost());
         }
 
 
     public void handleFlagClick(int row, int col){
         board.flagSquare(row, col);
-        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMines(), board.isHasWon(), board.isHasLost());
+        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMinesForCounter(), board.isHasWon(), board.isHasLost());
     }
 
     public void handleRestartGame(){
         board.clearOpenedSquares();
         board.setHasWonAsFalse();
         boardView.createGrid();
-
     }
 
     public BoardView getBoardView(){return boardView;}

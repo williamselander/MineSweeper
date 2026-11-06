@@ -61,21 +61,36 @@ public class BoardView extends VBox {
         this.isActive = isActive;
         this.hasWon = hasWon;
         this.hasLost = hasLost;
+
         updateCounter(totalMines);
         if (isActive) {
             createHappySmiley();
         } else {
             createSadSmiley();
         }
-
+        if (hasWon) {
+            createWinSmiley();
+        }
         //Loopa igenom nya board
+        loopThroughBoard(board);
+    }
+
+    private void loopThroughBoard(Square[][] board){
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length ; col++) {
                 Square square = board[row][col];
-                if (square.isBlown()) {
-                    setSquareAsBlown(squareViews[row][col]);
-                } else if (square.isFlagged()) {
-                    squareViews[row][col].setStyle("""
+                if (hasLost) {
+                    if (square.isBlown()) {
+                        setSquareAsBlown(squareViews[row][col]);
+                    } else if (square.isHasMine()) {
+                        setSquareAsMine(squareViews[row][col]);
+                    } else if (square.isOpen()) {
+                        setSquareClickedStyle(squareViews[row][col], square.getMinesAround());
+                    } else setSquareStandardStyle(squareViews[row][col]);
+                }
+                if (!hasLost) {
+                    if (square.isFlagged()) {
+                        squareViews[row][col].setStyle("""
                         -fx-background-color: #bdbdbd;
                         -fx-border-color: white #7b7b7b #7b7b7b white;
                         -fx-border-width: 3px;
@@ -84,16 +99,19 @@ public class BoardView extends VBox {
                         -fx-background-position: center;
                         -fx-background-size: contain;
                         """);
-                } else if (square.isOpen()) {
-                    if (square.isHasMine()) {
-                        setSquareWithMineStyle(squareViews[row][col]);
-                    } else {
-                        setSquareClickedStyle(squareViews[row][col], square.getMinesAround());
+                    } else if (square.isOpen()) {
+                        if (square.isHasMine()) {
+                            setSquareWithMineStyle(squareViews[row][col]);
+                        } else {
+                            setSquareClickedStyle(squareViews[row][col], square.getMinesAround());
+                        }
+                    }
+                    else {
+                        setSquareStandardStyle(squareViews[row][col]);
                     }
                 }
-                else {
-                    setSquareStandardStyle(squareViews[row][col]);
-                }
+
+
             }
         }
     }
@@ -140,6 +158,7 @@ public class BoardView extends VBox {
         // Vid restart
         smiley.setOnMouseClicked(event -> {
             hasLost = false;
+            hasWon = false;
             createHappySmiley();
             counter.setText("0");
             isActive = true;
@@ -169,7 +188,18 @@ public class BoardView extends VBox {
                           -fx-border-width: 3px;
                           -fx-border-color: white #7b7b7b #7b7b7b white;
                          """);
+    }
 
+    private void createWinSmiley(){
+        smiley.setStyle("""
+                         -fx-background-color: #bdbdbd;
+                         -fx-background-image: url('assets/win.gif');
+                         -fx-background-repeat: no-repeat;
+                         -fx-background-position: center;
+                          -fx-background-size: 62px 62px;
+                          -fx-border-width: 3px;
+                          -fx-border-color: white #7b7b7b #7b7b7b white;
+                         """);
     }
 
 
@@ -201,6 +231,18 @@ public class BoardView extends VBox {
                         -fx-background-color: #d50b06;
                          -fx-border-color: #8b8b8b;
                           -fx-border-width: 2px;
+                          -fx-background-image: url("assets/mine.png");
+                         -fx-background-repeat: no-repeat;
+                         -fx-background-position: center;
+                         -fx-background-size: contain;
+                          """);
+    }
+
+    private void setSquareAsMine(StackPane square) {
+        square.setStyle("""
+                        -fx-background-color: #bdbdbd;
+                         -fx-border-color: white #7b7b7b #7b7b7b white;
+                          -fx-border-width: 3px;
                           -fx-background-image: url("assets/mine.png");
                          -fx-background-repeat: no-repeat;
                          -fx-background-position: center;
