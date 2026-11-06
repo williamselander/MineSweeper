@@ -1,6 +1,5 @@
 package presentation;
 
-import com.sun.source.tree.NewClassTree;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,7 +7,6 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
 import model.Square;
 
 import java.util.function.BiConsumer;
@@ -17,13 +15,13 @@ public class BoardView extends VBox {
     private final BiConsumer<Integer, Integer> onSquareClick;
     private final BiConsumer<Integer, Integer> onFlagClick;
     private final Runnable onRestartGame;
-    private StackPane[][] squareViews = new StackPane[16][16];
-    private boolean hasWon = false;
+    private StackPane[][] squareViews;
     private boolean hasLost = false;
-    private boolean isActive = false;
-    private Label counter = new Label("0");
+    private final Label counter = new Label("0");
     private HBox smiley = new HBox();
-    private ToggleGroup difficulty = new ToggleGroup();
+    private final ToggleGroup difficulty = new ToggleGroup();
+    private int rowsBoard;
+    private int colsBoard;
 
     private final GridPane gridPane = new GridPane();
     public BoardView(
@@ -40,17 +38,57 @@ public class BoardView extends VBox {
         this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 5px; -fx-border-color: white #7b7b7b #7b7b7b white");
         HBox infoBox = createInfoBox();
         MenuBar settings =createSettings();
-        HBox top = new HBox(2);
-        top.setStyle("-fx-background-image: url('assets/top.png'); -fx-background-repeat: no-repeat; -fx-background-position: center; -fx-background-size: 100% 100%");
-        top.setMinHeight(40);
-        top.setPrefHeight(40);
-        top.setMaxHeight(40);
+        HBox top = createTop();
+
         this.getChildren().addAll(top,settings,infoBox,gridPane);
         createGrid();
     }
 
+    private HBox createTop(){
+        HBox top = new HBox(5);
+        top.setAlignment(Pos.CENTER_LEFT);
+        top.setPadding(new Insets(3));
+        top.setStyle("-fx-background-color: #0000aa ");
+        top.setMinHeight(35);
+        top.setPrefHeight(35);
+        top.setMaxHeight(35);
 
-    public MenuBar createSettings() {
+        Region mine = createTitleIcon("mine.png", 40,40);
+
+        Label text = new Label("Minesweeper");
+        text.setStyle("-fx-font-family: 'Microsoft Sans Serif'; -fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: white");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox threeIcons = new HBox(3);
+        threeIcons.setAlignment(Pos.CENTER);
+        threeIcons.getChildren().addAll(
+                createTitleIcon("minimi.png", 22,22),
+                            createTitleIcon("maximi.png", 22,22),
+                            createTitleIcon("kryss.png", 22,22)
+        );
+        top.getChildren().addAll(mine, text, spacer ,threeIcons);
+        return top;
+    }
+
+    private Region createTitleIcon(String fileName, int width, int height) {
+        Region icon = new Region();
+        icon.setMinSize(width,height);
+        icon.setPrefSize(width,height);
+        icon.setMaxSize(width,height);
+
+        icon.setStyle("""
+        -fx-background-image: url('assets/%s');
+        -fx-background-repeat: no-repeat;
+        -fx-background-position: center;
+        -fx-background-size: contain;
+        """.formatted(fileName));
+        return icon;
+    }
+
+
+    private MenuBar createSettings() {
         MenuItem newGame = new MenuItem("New");
         newGame.setOnAction(event -> onRestartGame.run());
 
@@ -62,6 +100,10 @@ public class BoardView extends VBox {
         intermediate.setToggleGroup(difficulty);
         expert.setToggleGroup(difficulty);
         intermediate.setSelected(true);
+        beginner.setOnAction(event->onRestartGame.run());
+        intermediate.setOnAction(event -> onRestartGame.run());
+        expert.setOnAction(event -> onRestartGame.run());
+
 
         MenuItem bestTimes = new MenuItem("Best Times");
         MenuItem exit = new MenuItem("Exit");
@@ -100,15 +142,13 @@ public class BoardView extends VBox {
         return new MenuBar(game, help);
     }
 
-
-
-
     public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
-        this.isActive = isActive;
-        this.hasWon = hasWon;
         this.hasLost = hasLost;
-
-        updateCounter(totalMines);
+        if (hasWon && !hasLost) {
+            updateCounter("Win!");
+        } else if (!hasWon && hasLost) {
+            updateCounter("Lost!");
+        } else updateCounter(String.valueOf(totalMines));
         if (isActive) {
             createHappySmiley();
         } else {
@@ -166,7 +206,6 @@ public class BoardView extends VBox {
         HBox box = new HBox(10);
         box.setStyle("""
                 -fx-border-width: 5px;
-
                 -fx-border-color:  white #7b7b7b #7b7b7b white;
                 """);
         smiley = createSmiley();
@@ -177,8 +216,8 @@ public class BoardView extends VBox {
         return box;
     }
 
-    private void updateCounter(int count){
-        counter.setText(String.valueOf(count));
+    private void updateCounter(String value){
+        counter.setText(value);
     }
 
     private HBox createMineCounter(){
@@ -204,10 +243,8 @@ public class BoardView extends VBox {
         // Vid restart
         smiley.setOnMouseClicked(event -> {
             hasLost = false;
-            hasWon = false;
             createHappySmiley();
             counter.setText("0");
-            isActive = true;
             onRestartGame.run();
         });
         return smiley;
@@ -308,30 +345,43 @@ public class BoardView extends VBox {
                         """);
     }
 
+    public int getRowsBoard(){
+        return this.rowsBoard;
+    }
+
+    public int getColsBoard(){
+        return this.colsBoard;
+    }
+
 
     public void createGrid(){
+        hasLost = false;
+        counter.setText("0");
+        createHappySmiley();
+
         gridPane.getChildren().clear();
-
-        int rows = 16;
-        int cols = 16;
-
-        switch (difficulty.getSelectedToggle().toString()) {
+        RadioMenuItem selected = (RadioMenuItem) difficulty.getSelectedToggle();
+        switch (selected.getText()) {
             case "Beginner" -> {
-                rows = 9;
-                cols = 9;
+                rowsBoard = 9;
+                colsBoard = 9;
             }
             case "Expert" -> {
-                rows = 30;
-                cols = 16;
+                rowsBoard = 16;
+                colsBoard = 30;
             }
+
+            // Default 16*16
             default -> {
-                rows = 16;
-                cols = 16;
+                rowsBoard = 16;
+                colsBoard = 16;
             }
         }
 
-        for (int row = 0; row < 16; row++) {
-            for (int col = 0; col  < 16 ; col++) {
+        squareViews = new StackPane[rowsBoard][colsBoard];
+
+        for (int row = 0; row < rowsBoard; row++) {
+            for (int col = 0; col < colsBoard ; col++) {
                 int currentRow = row;
                 int currentCol = col;
                 StackPane square = new StackPane();

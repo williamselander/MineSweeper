@@ -5,7 +5,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import model.Board;
 import presentation.Controller;
 
 import java.util.Objects;
@@ -14,8 +13,7 @@ import java.util.Objects;
 public class MinesweeperApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Board board = new Board();
-        Controller controller = new Controller(board);
+        Controller controller = new Controller();
 
         BorderPane root = new BorderPane();
         BorderPane desktop = createBox();
@@ -30,10 +28,10 @@ public class MinesweeperApplication extends Application {
         root.setCenter(desktop);
         root.setBottom(createBottom());
 
-        Scene scene = new Scene(root, 900, 900);
+        Scene scene = new Scene(root, 1200, 1200);
 
         desktopsIcons.visibleProperty().bind(
-                scene.widthProperty().greaterThan(1000)
+                scene.widthProperty().greaterThan(1300)
         );
         desktopsIcons.managedProperty().bind(
                 desktopsIcons.visibleProperty()

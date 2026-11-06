@@ -16,21 +16,19 @@ public class Square {
         this.hasMine = hasMine;
         this.isOpen = false;
         this.isFlagged = false;
-        this.minesAround = 0; // Antalet minor runt är 0 vid instansering
+        this.minesAround = 0;
         this.blown = false;
     }
 
     public void setAsOpen(){
         this.isOpen = true;
-        System.out.println("Öppnar");
     }
 
     public void setFlagged(){
-        System.out.println("Innan: " + isFlagged);
-
+        if (isOpen) {
+            return;
+        }
         this.isFlagged = !isFlagged;
-
-        System.out.println("Efter: " + isFlagged);
     }
 
     public void setAsBlown(){
@@ -44,8 +42,6 @@ public class Square {
     public void setMinesAround(int minesAround) {
         this.minesAround = minesAround;
     }
-
-
 
     public int getRow() {
         return row;

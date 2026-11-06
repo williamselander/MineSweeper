@@ -5,21 +5,26 @@ import java.util.List;
 import java.util.Random;
 
 public class Board {
-    private final Square[][] gameBoard = new Square[16][16];
+    private final Square[][] gameBoard;
     private final Random random = new Random();
     private boolean hasWon;
     private boolean hasLost;
     private int openedSquares = 0;
     private boolean isActive = false;
 
-    public Board() {
+    public Board(Square[][] gameBoard) {
         this.hasWon = false;
+        this.gameBoard = gameBoard;
+    }
+
+    private int getTotalSquares(){
+        return gameBoard.length * gameBoard[0].length;
     }
 
 
     public void hasPlayerWon(){
         // ifall totala rutor - antalet minor = opened squares har man vunnit.
-        if (256 - getTotalMines() == openedSquares && !hasLost) {
+        if (getTotalSquares() - getTotalMines() == openedSquares && !hasLost) {
             setAsWon();
         }
     }
@@ -28,18 +33,6 @@ public class Board {
     private void setAsWon(){
         this.hasWon = true;
         this.isActive = false;
-    }
-
-    public void clearOpenedSquares(){
-        openedSquares = 0;
-    }
-
-    public void setHasWonAsFalse(){
-        this.hasWon = false;
-    }
-
-    public boolean isBlown(int row, int col) {
-        return gameBoard[row][col].isBlown();
     }
 
     public void setAsBlown(int row, int col) {
@@ -63,8 +56,8 @@ public class Board {
     public boolean isHasLost(){return this.hasLost;}
 
     private void createFirstArray(int rowClicked, int colClicked){
-        for (int row = 0; row < 16 ; row++) {
-            for (int col = 0; col < 16; col++) {
+        for (int row = 0; row < gameBoard.length ; row++) {
+            for (int col = 0; col < gameBoard[row].length; col++) {
                 boolean hasMine;
                 // Ifall det är koordinaten där användaren klickat, bir det ej en mina.
                 if (row == rowClicked && col == colClicked) {
@@ -78,8 +71,8 @@ public class Board {
     public Square[][] getBoard(){return gameBoard.clone();}
 
     private void setMinesAround(){
-        for (int row = 0; row < 16 ; row++) {
-            for (int col = 0; col < 16 ; col++) {
+        for (int row = 0; row < gameBoard.length ; row++) {
+            for (int col = 0; col < gameBoard[row].length ; col++) {
                 var adjacentSquares = getAdjacentSquares(row, col);
                 gameBoard[row][col].setMinesAround(Math.toIntExact(findMinesAround(adjacentSquares)));
             }
@@ -112,17 +105,25 @@ public class Board {
     }
 
     private boolean hasMine(){
-        // 10% chans för en mina
-        return random.nextDouble() < 0.10;
-    }
+        int totalSquares = getTotalSquares();
 
-    public boolean hasSquareMine(int row, int col) {
-        return gameBoard[row][col].isHasMine();
+        switch (totalSquares) {
+            // Beginner ger 10 % för mina
+            case 81 -> {
+                return random.nextDouble() < 0.10;
+            }
+            // Expert ger 20%
+            case 480 -> {
+                return random.nextDouble() < 0.20;
+            }
+            // Default och intermediate ger 13%
+            default -> {
+                return random.nextDouble() < 0.13;
+            }
+        }
     }
-
 
     public void reveal(int row, int col) {
-        System.out.println(isActive);
 
         if (!isActive) {
             return;
@@ -181,16 +182,6 @@ public class Board {
         return totalFlagged;
     }
 
-    public void openSquare(int row, int col) {
-        Square squareToOpen = gameBoard[row][col];
-        // Om den redan är öppnad eller flaggad
-        if (squareToOpen.isOpen() || squareToOpen.isFlagged()) {
-            return;
-        }
-        squareToOpen.setAsOpen();
-        openedSquares++;
-    }
-
     public int getOpenedSquares(){return openedSquares;}
 
     public void flagSquare(int row, int col) {
@@ -203,8 +194,4 @@ public class Board {
         Square square = gameBoard[row][col];
         square.setFlagged();
     }
-
-
-
-
 }
