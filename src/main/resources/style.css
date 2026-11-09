@@ -17,7 +17,75 @@
     -fx-border-width: 2px;
 }
 
+.smiley-happy {
+    -fx-background-color: #bdbdbd;
+    -fx-background-image: url('assets/happy.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 42px 42px;
+    -fx-border-width: 3px;
+    -fx-border-color: white #7b7b7b #7b7b7b white;
+}
 
+.smiley-sad {
+    -fx-background-color: #bdbdbd;
+    -fx-background-image: url('assets/sad.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 62px 62px;
+    -fx-border-width: 3px;
+    -fx-border-color: white #7b7b7b #7b7b7b white;
+}
+
+.smiley-win {
+    -fx-background-color: #bdbdbd;
+    -fx-background-image: url('assets/win.gif');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 62px 62px;
+    -fx-border-width: 3px;
+    -fx-border-color: white #7b7b7b #7b7b7b white;
+}
+
+.square-blown {
+    -fx-background-color: #d50b06;
+    -fx-border-color: #8b8b8b;
+    -fx-border-width: 2px;
+    -fx-background-image: url("assets/mine.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: contain;
+}
+
+.square-as-mine {
+    -fx-background-color: #bdbdbd;
+    -fx-border-color: white #7b7b7b #7b7b7b white;
+    -fx-border-width: 3px;
+    -fx-background-image: url("assets/mine.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: contain;
+}
+
+.square-with-mine {
+    -fx-background-color: #b6b6b6;
+    -fx-border-color: #8b8b8b;
+    -fx-border-width: 2px;
+    -fx-background-image: url("assets/mine.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: contain;
+}
+
+.square-with-flag {
+    -fx-background-color: #bdbdbd;
+    -fx-border-color: white #7b7b7b #7b7b7b white;
+    -fx-border-width: 3px;
+    -fx-background-image: url("assets/Flag.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: contain;
+}
 
 .mines-1 {
     -fx-text-fill: #0000ff;
