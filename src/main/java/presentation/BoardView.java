@@ -111,7 +111,10 @@ public class BoardView extends VBox {
             });
             return option;
         }
-        option.setOnAction(event -> onRestartGame.run());
+        option.setOnAction(event -> {
+            onRestartGame.run();
+            timerApplied = true;
+        });
         return option;
     }
 
@@ -380,7 +383,6 @@ public class BoardView extends VBox {
         timeline.stop();
         timeline.getKeyFrames().clear();
         timerStarted = false;
-        timerApplied = true;
         createHappySmiley();
         gridPane.getChildren().clear();
     }
@@ -424,6 +426,7 @@ public class BoardView extends VBox {
                 square.setPrefSize(40,40);
                 setSquareStandardStyle(square);
                 square.setCursor(Cursor.HAND);
+
                 square.setOnMouseClicked(event -> {
                     if (hasLost) {
                         return;
