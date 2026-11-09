@@ -3,7 +3,7 @@ package model;
 public class Square {
     private final int row;
     private final int col;
-    private boolean hasMine;
+    private final boolean hasMine;
     private boolean isOpen;
     private boolean isFlagged;
     private int minesAround;

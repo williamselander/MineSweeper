@@ -136,6 +136,12 @@
     -fx-border-width: 2px
 }
 
+.square-standard {
+    -fx-background-color: #bdbdbd;
+    -fx-border-width: 3px ;
+    -fx-border-color: white #7b7b7b #7b7b7b white;
+}
+
 .square-with-mine {
     -fx-background-color: #b6b6b6;
     -fx-border-color: #8b8b8b;

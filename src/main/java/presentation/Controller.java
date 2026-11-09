@@ -17,10 +17,6 @@ public class Controller {
         this.board = new Board(new Square[rows][cols]);
         board.createBoard(row, col);
     }
-
-    // Den första man klickar på får ej vara en mina.
-    // Rutan får ej öppnas om den är flaggad
-    // Börja sätta ut spelplanen här kanske???
     public void handleSquareClick(int row, int col){
         if (board == null) {
             startGame(
@@ -35,7 +31,6 @@ public class Controller {
         board.hasPlayerWon();
         boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMinesForCounter(), board.isHasWon(), board.isHasLost());
         }
-
 
     public void handleFlagClick(int row, int col){
         if (board == null) {

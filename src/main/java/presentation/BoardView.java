@@ -28,8 +28,10 @@ public class BoardView extends VBox {
     private int maxSeconds = 300;
     private final Label timer = new Label("05:00");
     private boolean timerStarted = false;
+    private boolean timerApplied = true;
     private HBox smiley = new HBox();
     private final ToggleGroup difficulty = new ToggleGroup();
+    private final ToggleGroup timerSettings = new ToggleGroup();
     private int rowsBoard;
     private int colsBoard;
     private final GridPane gridPane = new GridPane();
@@ -92,24 +94,41 @@ public class BoardView extends VBox {
         return icon;
     }
 
+    private RadioMenuItem createDifficultyOptions(String text){
+        RadioMenuItem option = new RadioMenuItem(text);
+        option.setToggleGroup(difficulty);
+        option.setOnAction(event -> onRestartGame.run());
+        return option;
+    }
+
+    private RadioMenuItem createTimerOptions(String text) {
+        RadioMenuItem option = new RadioMenuItem(text);
+        option.setToggleGroup(timerSettings);
+        if (text.equals("Ingen timer")) {
+            option.setOnAction(event -> {
+                onRestartGame.run();
+                timerApplied = false;
+            });
+            return option;
+        }
+        option.setOnAction(event -> onRestartGame.run());
+        return option;
+    }
 
     private MenuBar createSettings() {
         MenuItem newGame = new MenuItem("New");
         newGame.setOnAction(event -> onRestartGame.run());
 
-        RadioMenuItem beginner = new RadioMenuItem("Beginner");
-        RadioMenuItem intermediate = new RadioMenuItem("Intermediate");
-        RadioMenuItem expert = new RadioMenuItem("Expert");
+        RadioMenuItem beginner = createDifficultyOptions("Nybörjare");
+        RadioMenuItem intermediate = createDifficultyOptions("Mellannivå");
+        RadioMenuItem expert = createDifficultyOptions("Expert");
 
-        beginner.setToggleGroup(difficulty);
-        intermediate.setToggleGroup(difficulty);
-        expert.setToggleGroup(difficulty);
+        RadioMenuItem noTimer = createTimerOptions("Ingen timer");
+        RadioMenuItem standard = createTimerOptions("Standard");
+
         intermediate.setSelected(true);
-        beginner.setOnAction(event->onRestartGame.run());
-        intermediate.setOnAction(event -> onRestartGame.run());
-        expert.setOnAction(event -> onRestartGame.run());
+        standard.setSelected(true);
 
-        MenuItem bestTimes = new MenuItem("Best Times");
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
 
@@ -121,18 +140,24 @@ public class BoardView extends VBox {
                 intermediate,
                 expert,
                 new SeparatorMenuItem(),
-                bestTimes,
+                noTimer,
+                standard,
+                new SeparatorMenuItem(),
                 exit
         );
-        Menu help = new Menu("Help");
 
+        Menu help = createHelpOptions();
+        return new MenuBar(game, help);
+    }
+
+    private Menu createHelpOptions(){
+        Menu help = new Menu("Help");
         MenuItem firsHelp = new MenuItem("1. Öppna en ruta med vänsterklick för att börja");
         MenuItem secondHelp = new MenuItem("2. Rutor med siffror har så många minor runt sig");
         MenuItem thirdHelp = new MenuItem("3. Flagga rutorna som du tror har en mina med högerklick");
         MenuItem fourthHelp = new MenuItem("4. Ifall du klickar på en ruta med mina eller att tiden går ut har du förlorat ");
         MenuItem fifthHelp = new MenuItem("5. Du har vunnit när alla rutor förutom dom flaggade är klickade,\n och du har markerat rätt rutor med minor. Smileyn kommer bli cool");
         MenuItem lastHelp = new MenuItem("6. Starta om spelet antingen i Game eller genom att klicka på smileyn");
-
         help.getItems().addAll(
                 firsHelp,
                 secondHelp,
@@ -141,7 +166,7 @@ public class BoardView extends VBox {
                 fifthHelp,
                 lastHelp
         );
-        return new MenuBar(game, help);
+        return help;
     }
 
     private void setHasWon(boolean hasWon){this.hasWon = hasWon;}
@@ -149,6 +174,9 @@ public class BoardView extends VBox {
     public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
         setHasLost(hasLost);
         setHasWon(hasWon);
+        if (!timerApplied) {
+            timer.setText("---");
+        }
         if (hasWon && !hasLost) {
             updateCounter("Win!");
         } else if (!hasWon && hasLost) {
@@ -303,7 +331,7 @@ public class BoardView extends VBox {
     }
 
     private void setSquareStandardStyle(StackPane square) {
-        square.setStyle("-fx-background-color: #bdbdbd;-fx-border-width: 3px ;-fx-border-color: white #7b7b7b #7b7b7b white;");
+        square.getStyleClass().setAll("square-standard");
     }
 
     private void setSquareClickedStyle(StackPane square, int minesAround){
@@ -352,6 +380,7 @@ public class BoardView extends VBox {
         timeline.stop();
         timeline.getKeyFrames().clear();
         timerStarted = false;
+        timerApplied = true;
         createHappySmiley();
         gridPane.getChildren().clear();
     }
@@ -359,7 +388,7 @@ public class BoardView extends VBox {
     private void applySelectedDifficulty(){
         RadioMenuItem selected = (RadioMenuItem) difficulty.getSelectedToggle();
         switch (selected.getText()) {
-            case "Beginner" -> {
+            case "Nybörjare" -> {
                 this.rowsBoard = 9;
                 this.colsBoard = 9;
                 setMaxSeconds(300);
@@ -401,7 +430,8 @@ public class BoardView extends VBox {
                     }
                     // Om ej flagga klickat
                     if (event.getButton() == MouseButton.PRIMARY) {
-                        if (!timerStarted) {
+                        // Ifall användaren spelar med timer på och den ej har satts på ännu
+                        if (!timerStarted && timerApplied) {
                             createTimeline(); // sätter på timern
                             timerStarted = true;
                         }
