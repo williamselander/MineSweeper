@@ -27,6 +27,7 @@ public class BoardView extends VBox {
     private final Timeline timeline = new Timeline();
     private int maxSeconds = 300;
     private final Label timer = new Label("05:00");
+    private boolean timerStarted = false;
     private HBox smiley = new HBox();
     private final ToggleGroup difficulty = new ToggleGroup();
     private int rowsBoard;
@@ -41,15 +42,11 @@ public class BoardView extends VBox {
         this.onSquareClick = onSquareClick;
         this.onFlagClick = onFlagClick;
         this.onRestartGame = onRestartGame;
-        this.setSpacing(15);
-        this.setAlignment(Pos.CENTER);
-        this.setPadding(new Insets(0, 20, 20, 20));
-        this.setStyle("-fx-background-color: #bdbdbd; -fx-border-width: 5px; -fx-border-color: white #7b7b7b #7b7b7b white");
+        this.getStyleClass().add("main-box");
         HBox infoBox = createInfoBox();
-        MenuBar settings =createSettings();
+        MenuBar settings = createSettings();
         HBox top = createTop();
         gridPane.setAlignment(Pos.CENTER);
-
         this.getChildren().addAll(top,settings,infoBox,gridPane);
         createGrid();
     }
@@ -59,21 +56,12 @@ public class BoardView extends VBox {
 
     private HBox createTop(){
         HBox top = new HBox(5);
-        top.setAlignment(Pos.CENTER_LEFT);
-        top.setPadding(new Insets(3));
-        top.setStyle("-fx-background-color: #0000aa ");
-        top.setMinHeight(35);
-        top.setPrefHeight(35);
-        top.setMaxHeight(35);
-
+        top.getStyleClass().add("top-box");
         Region mine = createTitleIcon("mine.png", 40,40);
-
         Label text = new Label("Minesweeper");
-        text.setStyle("-fx-font-family: 'Microsoft Sans Serif'; -fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: white");
-
+        text.getStyleClass().add("top-text");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
         HBox threeIcons = new HBox(3);
         threeIcons.setAlignment(Pos.CENTER);
         threeIcons.getChildren().addAll(
@@ -120,7 +108,6 @@ public class BoardView extends VBox {
         beginner.setOnAction(event->onRestartGame.run());
         intermediate.setOnAction(event -> onRestartGame.run());
         expert.setOnAction(event -> onRestartGame.run());
-
 
         MenuItem bestTimes = new MenuItem("Best Times");
         MenuItem exit = new MenuItem("Exit");
@@ -220,23 +207,17 @@ public class BoardView extends VBox {
 
     private HBox createInfoBox(){
         HBox box = new HBox(10);
-        box.setStyle("""
-                -fx-border-width: 5px;
-                -fx-border-color:  white #7b7b7b #7b7b7b white;
-                """);
+        box.getStyleClass().add("info-box");
         smiley = createSmiley();
+
         HBox countBox = createCounter(120);
         countBox.getChildren().add(counter);
         counter.getStyleClass().add("mine-counter");
+
         HBox timerBox = createCounter(140);
         timerBox.getChildren().add(timer);
-        timer.getStyleClass().add("mine-counter");
-        timer.setMinSize(120,55);
-        timer.setPrefSize(120,55);
-        timer.setMaxSize(120,55);
-        timer.setAlignment(Pos.CENTER);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(20));
+        timer.getStyleClass().add("timer");
+
         box.getChildren().addAll(countBox, smiley, timerBox);
         return box;
     }
@@ -287,10 +268,9 @@ public class BoardView extends VBox {
 
     private HBox createCounter(int width){
         HBox countBox = new HBox();
-        countBox.setAlignment(Pos.CENTER);
+        countBox.getStyleClass().add("count-box");
         countBox.setMinSize(width,60);
         countBox.setPrefSize(width,60);
-        countBox.setStyle(" -fx-background-color: #bdbdbd; -fx-border-width: 3px; -fx-border-color: white #7b7b7b #7b7b7b white;");
         return countBox;
     }
 
@@ -341,7 +321,7 @@ public class BoardView extends VBox {
             }
             square.getChildren().add(minesLabel);
         }
-        square.setStyle("-fx-background-color: #b6b6b6; -fx-border-color: #8b8b8b; -fx-border-width: 2px");
+        square.getStyleClass().setAll("square-clicked");
     }
 
     private void setSquareAsBlown(StackPane square) {
@@ -365,14 +345,18 @@ public class BoardView extends VBox {
         return this.colsBoard;
     }
 
-    public void createGrid(){
+    private void resetBoardView(){
         setHasLost(false);
         setHasWon(false);
         updateCounter("0");
-        timer.setText("05:00");
         timeline.stop();
+        timeline.getKeyFrames().clear();
+        timerStarted = false;
         createHappySmiley();
         gridPane.getChildren().clear();
+    }
+
+    private void applySelectedDifficulty(){
         RadioMenuItem selected = (RadioMenuItem) difficulty.getSelectedToggle();
         switch (selected.getText()) {
             case "Beginner" -> {
@@ -385,7 +369,6 @@ public class BoardView extends VBox {
                 this.colsBoard = 30;
                 setMaxSeconds(420);
             }
-
             // Default 16*16
             default -> {
                 this.rowsBoard = 16;
@@ -393,40 +376,46 @@ public class BoardView extends VBox {
                 setMaxSeconds(300);
             }
         }
+    }
 
+    public void createGrid(){
+        resetBoardView();
+        applySelectedDifficulty();
+        setTimerText(maxSeconds, 0);
         squareViews = new StackPane[rowsBoard][colsBoard];
+        createSquares();
+    }
 
+    private void createSquares(){
         for (int row = 0; row < rowsBoard; row++) {
             for (int col = 0; col < colsBoard ; col++) {
                 int currentRow = row;
                 int currentCol = col;
                 StackPane square = new StackPane();
-
                 square.setPrefSize(40,40);
                 setSquareStandardStyle(square);
                 square.setCursor(Cursor.HAND);
-
                 square.setOnMouseClicked(event -> {
                     if (hasLost) {
                         return;
                     }
                     // Om ej flagga klickat
                     if (event.getButton() == MouseButton.PRIMARY) {
-                        createTimeline(); // Sätter på timern
+                        if (!timerStarted) {
+                            createTimeline(); // sätter på timern
+                            timerStarted = true;
+                        }
                         onSquareClick.accept(currentRow, currentCol);
                         return;
                     }
-
                     // Om flagga är klickad
-                        onFlagClick.accept(currentRow, currentCol);
+                    onFlagClick.accept(currentRow, currentCol);
                 });
-
                 squareViews[row][col] = square;
                 gridPane.add(square, col, row);
             }
-
         }
-
     }
+
 
 }
