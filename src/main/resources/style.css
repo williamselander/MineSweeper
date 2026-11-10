@@ -170,28 +170,49 @@
 }
 
 .mines-2 {
-    -fx-text-fill:#469746;
+    -fx-text-fill:#008000;
     -fx-font-family: MS sans-serif;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
 .mines-3 {
-    -fx-text-fill: #db6d6d;
+    -fx-text-fill: #FF0000;
     -fx-font-family: MS sans-serif;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
 .mines-4 {
-    -fx-text-fill: #000084;
+    -fx-text-fill: #000080;
     -fx-font-family: MS sans-serif;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
 .mines-5 {
-    -fx-text-fill: #861212;
+    -fx-text-fill: #800000;
+    -fx-font-family: MS sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.mines-6 {
+    -fx-text-fill: #008080;
+    -fx-font-family: MS sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.mines-7 {
+    -fx-text-fill: #000000;
+    -fx-font-family: MS sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.mines-8 {
+    -fx-text-fill: #808080;
     -fx-font-family: MS sans-serif;
     -fx-font-size: 20px;
     -fx-font-weight: bold;

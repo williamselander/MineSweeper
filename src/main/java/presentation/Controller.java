@@ -9,7 +9,6 @@ public class Controller {
     private Board board;
 
     public Controller(){
-
         this.boardView = new BoardView(this::handleSquareClick, this::handleFlagClick, this::handleRestartGame, this::handleLoss);
     }
 
@@ -22,10 +21,6 @@ public class Controller {
             startGame(
                     row,col, boardView.getRowsBoard(), boardView.getColsBoard()
             );
-        }
-
-        if (board.getOpenedSquares() == 0) {
-            startGame(row, col, boardView.getRowsBoard(), boardView.getColsBoard());
         }
         board.reveal(row, col);
         board.hasPlayerWon();

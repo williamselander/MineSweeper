@@ -185,7 +185,6 @@ public class Board {
         return totalFlagged;
     }
 
-    public int getOpenedSquares(){return openedSquares;}
 
     public void flagSquare(int row, int col) {
         if (getStatus() != GameStatus.ACTIVE) {

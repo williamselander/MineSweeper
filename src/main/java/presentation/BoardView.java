@@ -108,14 +108,14 @@ public class BoardView extends VBox {
         option.setToggleGroup(timerSettings);
         if (text.equals("Ingen timer")) {
             option.setOnAction(event -> {
-                onRestartGame.run();
                 timerApplied = false;
+                onRestartGame.run();
             });
             return option;
         }
         option.setOnAction(event -> {
-            onRestartGame.run();
             timerApplied = true;
+            onRestartGame.run();
         });
         return option;
     }
@@ -334,6 +334,7 @@ public class BoardView extends VBox {
     }
 
     private void setSquareClickedStyle(StackPane square, int minesAround){
+        square.getChildren().clear();
         if (minesAround != 0) {
             Label minesLabel = new Label(String.valueOf(minesAround));
             switch (minesAround) {
@@ -342,6 +343,9 @@ public class BoardView extends VBox {
                 case 3 -> minesLabel.getStyleClass().add("mines-3");
                 case 4 -> minesLabel.getStyleClass().add("mines-4");
                 case 5 -> minesLabel.getStyleClass().add("mines-5");
+                case 6 -> minesLabel.getStyleClass().add("mines-6");
+                case 7 -> minesLabel.getStyleClass().add("mines-7");
+                case 8 -> minesLabel.getStyleClass().add("mines-8");
                 default -> {
                     return;
                 }
@@ -407,7 +411,9 @@ public class BoardView extends VBox {
     public void createGrid(){
         resetBoardView();
         applySelectedDifficulty();
-        setTimerText(maxSeconds, 0);
+        if (timerApplied) {
+            setTimerText(maxSeconds, 0);
+        } else this.timer.setText("---");
         squareViews = new StackPane[rowsBoard][colsBoard];
         createSquares();
     }
@@ -435,9 +441,10 @@ public class BoardView extends VBox {
                         }
                         onSquareClick.accept(currentRow, currentCol);
                         return;
+                    } else if (event.getButton() == MouseButton.SECONDARY) {
+                        // Om flagga är klickad
+                        onFlagClick.accept(currentRow, currentCol);
                     }
-                    // Om flagga är klickad
-                    onFlagClick.accept(currentRow, currentCol);
                 });
                 squareViews[row][col] = square;
                 gridPane.add(square, col, row);
