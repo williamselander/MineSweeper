@@ -10,7 +10,7 @@ public class Controller {
 
     public Controller(){
 
-        this.boardView = new BoardView(this::handleSquareClick, this::handleFlagClick, this::handleRestartGame);
+        this.boardView = new BoardView(this::handleSquareClick, this::handleFlagClick, this::handleRestartGame, this::handleLoss);
     }
 
     private void startGame(int row, int col, int rows, int cols){
@@ -29,7 +29,7 @@ public class Controller {
         }
         board.reveal(row, col);
         board.hasPlayerWon();
-        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMinesForCounter(), board.isHasWon(), board.isHasLost());
+        boardView.updateBoard(board.getBoard(), board.getStatus(), board.getTotalMinesForCounter());
         }
 
     public void handleFlagClick(int row, int col){
@@ -37,12 +37,17 @@ public class Controller {
             return;
         }
         board.flagSquare(row, col);
-        boardView.updateBoard(board.getBoard(), board.isActive(), board.getTotalMinesForCounter(), board.isHasWon(), board.isHasLost());
+        boardView.updateBoard(board.getBoard(), board.getStatus(), board.getTotalMinesForCounter());
     }
 
     public void handleRestartGame(){
         board = null;
         boardView.createGrid();
+    }
+
+    public void handleLoss(){
+        board.setStatusAsLost();
+        boardView.updateBoard(board.getBoard(), board.getStatus(), board.getTotalMinesForCounter());
     }
 
     public BoardView getBoardView(){return boardView;}

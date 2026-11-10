@@ -7,53 +7,58 @@ import java.util.Random;
 public class Board {
     private final Square[][] gameBoard;
     private final Random random = new Random();
-    private boolean hasWon;
-    private boolean hasLost;
     private int openedSquares = 0;
-    private boolean isActive = false;
+    private GameStatus status;
+
 
     public Board(Square[][] gameBoard) {
-        this.hasWon = false;
+        setStatusAsNotStarted();
         this.gameBoard = gameBoard;
+    }
+
+    public void setStatusAsNotStarted(){
+        this.status = GameStatus.NOT_STARTED;
+    }
+
+    public void setStatusAsWon(){
+        this.status = GameStatus.WON;
+    }
+
+    public void setStatusAsLost(){
+        this.status = GameStatus.LOST;
+    }
+
+    public void setStatusAsActive(){
+        this.status = GameStatus.ACTIVE;
     }
 
     private int getTotalSquares(){
         return gameBoard.length * gameBoard[0].length;
     }
 
+    public GameStatus getStatus() {
+        return status;
+    }
 
     public void hasPlayerWon(){
         // ifall totala rutor - antalet minor = opened squares har man vunnit.
-        if (getTotalSquares() - getTotalMines() == openedSquares && !hasLost) {
-            setAsWon();
+        if (getTotalSquares() - getTotalMines() == openedSquares && !getStatus().equals(GameStatus.LOST)) {
+            setStatusAsWon();
         }
-    }
-
-
-    private void setAsWon(){
-        this.hasWon = true;
-        this.isActive = false;
     }
 
     public void setAsBlown(int row, int col) {
         gameBoard[row][col].setAsBlown();
-        hasLost = true;
+        setStatusAsLost();
     }
 
-    public boolean isActive(){return isActive;}
-    public void setAsActive(){this.isActive = true;}
-    public void setAsUnactive(){this.isActive = false;}
 
     public void createBoard(int row, int col) {
         // Skapar första array
         createFirstArray(row, col);
         setMinesAround();
-        setAsActive();
-        this.hasWon = false;
-        this.hasLost = false;
+        setStatusAsActive();
     }
-
-    public boolean isHasLost(){return this.hasLost;}
 
     private void createFirstArray(int rowClicked, int colClicked){
         for (int row = 0; row < gameBoard.length ; row++) {
@@ -125,7 +130,7 @@ public class Board {
 
     public void reveal(int row, int col) {
 
-        if (!isActive) {
+        if (!getStatus().equals(GameStatus.ACTIVE)) {
             return;
         }
         Square square = gameBoard[row][col];
@@ -139,7 +144,6 @@ public class Board {
 
         if (square.isHasMine()) {
             setAsBlown(row, col);
-            setAsUnactive();
             return;
         }
 
@@ -152,7 +156,6 @@ public class Board {
         }
     }
 
-    public boolean isHasWon(){return hasWon;}
 
     public int getTotalMines(){
         int totalMines = 0;
@@ -185,7 +188,7 @@ public class Board {
     public int getOpenedSquares(){return openedSquares;}
 
     public void flagSquare(int row, int col) {
-        if (!isActive) {
+        if (getStatus() != GameStatus.ACTIVE) {
             return;
         }
         if (!gameBoard[row][col].isFlagged() && getTotalMinesForCounter() - 1 < 0) {

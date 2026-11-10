@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
+import model.GameStatus;
 import model.Square;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,9 +21,9 @@ public class BoardView extends VBox {
     private final BiConsumer<Integer, Integer> onSquareClick;
     private final BiConsumer<Integer, Integer> onFlagClick;
     private final Runnable onRestartGame;
+    private final Runnable onLoss;
     private StackPane[][] squareViews;
-    private boolean hasLost = false;
-    private boolean hasWon = false;
+    private GameStatus gameStatus = GameStatus.NOT_STARTED;
     private final Label counter = new Label("0");
     private final Timeline timeline = new Timeline();
     private int maxSeconds = 300;
@@ -39,11 +40,13 @@ public class BoardView extends VBox {
     public BoardView(
             BiConsumer<Integer, Integer> onSquareClick,
             BiConsumer<Integer, Integer> onFlagClick,
-            Runnable onRestartGame
+            Runnable onRestartGame,
+            Runnable onLoss
     ){
         this.onSquareClick = onSquareClick;
         this.onFlagClick = onFlagClick;
         this.onRestartGame = onRestartGame;
+        this.onLoss = onLoss;
         this.getStyleClass().add("main-box");
         HBox infoBox = createInfoBox();
         MenuBar settings = createSettings();
@@ -54,7 +57,6 @@ public class BoardView extends VBox {
     }
 
     private void setMaxSeconds(int seconds) {this.maxSeconds = seconds;}
-    private void setHasLost(boolean hasLost){this.hasLost = hasLost;}
 
     private HBox createTop(){
         HBox top = new HBox(5);
@@ -172,25 +174,30 @@ public class BoardView extends VBox {
         return help;
     }
 
-    private void setHasWon(boolean hasWon){this.hasWon = hasWon;}
+    public void updateBoard(Square[][] board, GameStatus gameStatus, int totalMines) {
+        this.gameStatus = gameStatus;
 
-    public void updateBoard(Square[][] board, boolean isActive, int totalMines, boolean hasWon, boolean hasLost) {
-        setHasLost(hasLost);
-        setHasWon(hasWon);
         if (!timerApplied) {
             timer.setText("---");
         }
-        if (hasWon && !hasLost) {
-            updateCounter("Win!");
-        } else if (!hasWon && hasLost) {
-            updateCounter("Lost!");
-        } else updateCounter(String.valueOf(totalMines));
-        if (isActive) {
+        switch (gameStatus) {
+            case GameStatus.WON -> {
+                timeline.stop();
+                updateCounter("Win!");
+            }
+            case GameStatus.LOST -> {
+                timeline.stop();
+                updateCounter("Lost!");
+            }
+            default -> updateCounter(String.valueOf(totalMines));
+
+        }
+        if (gameStatus == GameStatus.ACTIVE) {
             createHappySmiley();
         } else {
             createSadSmiley();
         }
-        if (hasWon) {
+        if (gameStatus == GameStatus.WON) {
             createWinSmiley();
         }
         //Loopa igenom nya board
@@ -226,10 +233,10 @@ public class BoardView extends VBox {
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length ; col++) {
                 Square square = board[row][col];
-                if (hasLost) {
+                if (gameStatus == GameStatus.LOST) {
                     renderSquareAfterLoss(square, row, col);
                 }
-                if (!hasLost) {
+                if (gameStatus != GameStatus.LOST) {
                     renderSquareDuringGame(square, row, col);
                 }
             }
@@ -261,20 +268,10 @@ public class BoardView extends VBox {
             int current = elapsedSeconds.incrementAndGet();
             if (current >= maxSeconds ) {
                 timeline.stop();
-                setHasLost(true);
+                onLoss.run();
                 setTimerText(0,0);
                 updateCounter("Lost!");
                 createSadSmiley();
-                return;
-            }
-            if (hasLost || hasWon) {
-                timeline.stop();
-                if (hasWon) {
-                    timeline.stop();
-                    setTimerText(maxSeconds, current);
-                } else {
-                    setTimerText(0,0);
-                }
                 return;
             }
             setTimerText(maxSeconds, current);
@@ -315,7 +312,6 @@ public class BoardView extends VBox {
 
         // Vid restart
         smiley.setOnMouseClicked(event -> {
-            hasLost = false;
             createHappySmiley();
             counter.setText("0");
             onRestartGame.run();
@@ -377,12 +373,11 @@ public class BoardView extends VBox {
     }
 
     private void resetBoardView(){
-        setHasLost(false);
-        setHasWon(false);
         updateCounter("0");
         timeline.stop();
         timeline.getKeyFrames().clear();
         timerStarted = false;
+        this.gameStatus = GameStatus.NOT_STARTED;
         createHappySmiley();
         gridPane.getChildren().clear();
     }
@@ -428,7 +423,7 @@ public class BoardView extends VBox {
                 square.setCursor(Cursor.HAND);
 
                 square.setOnMouseClicked(event -> {
-                    if (hasLost) {
+                    if (gameStatus == GameStatus.LOST) {
                         return;
                     }
                     // Om ej flagga klickat
