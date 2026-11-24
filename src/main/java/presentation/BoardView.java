@@ -440,7 +440,6 @@ public class BoardView extends VBox {
                             timerStarted = true;
                         }
                         onSquareClick.accept(currentRow, currentCol);
-                        return;
                     } else if (event.getButton() == MouseButton.SECONDARY) {
                         // Om flagga är klickad
                         onFlagClick.accept(currentRow, currentCol);

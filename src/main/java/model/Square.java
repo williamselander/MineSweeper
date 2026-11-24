@@ -3,7 +3,7 @@ package model;
 public class Square {
     private final int row;
     private final int col;
-    private final boolean hasMine;
+    private  boolean hasMine;
     private boolean isOpen;
     private boolean isFlagged;
     private int minesAround;
@@ -29,6 +29,10 @@ public class Square {
             return;
         }
         this.isFlagged = !isFlagged;
+    }
+
+    public void setHasMine(){
+        this.hasMine = true;
     }
 
     public void setAsBlown(){

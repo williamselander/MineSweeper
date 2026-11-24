@@ -55,20 +55,16 @@ public class Board {
 
     public void createBoard(int row, int col) {
         // Skapar första array
-        createFirstArray(row, col);
+        createFirstArray();
+        createMines(row, col);
         setMinesAround();
         setStatusAsActive();
     }
 
-    private void createFirstArray(int rowClicked, int colClicked){
+    private void createFirstArray(){
         for (int row = 0; row < gameBoard.length ; row++) {
             for (int col = 0; col < gameBoard[row].length; col++) {
-                boolean hasMine;
-                // Ifall det är koordinaten där användaren klickat, bir det ej en mina.
-                if (row == rowClicked && col == colClicked) {
-                    hasMine = false;
-                } else hasMine = hasMine();
-                gameBoard[row][col] = new Square(row, col, hasMine);
+                gameBoard[row][col] = new Square(row, col, false);
             }
         }
     }
@@ -109,22 +105,27 @@ public class Board {
         return adjacentSquares;
     }
 
-    private boolean hasMine(){
+    private void createMines(int rowClicked, int colClicked){
         int totalSquares = getTotalSquares();
-
+        int totalMines;
         switch (totalSquares) {
             // Beginner ger 10 % för mina
-            case 81 -> {
-                return random.nextDouble() < 0.10;
-            }
-            // Expert ger 20%
-            case 480 -> {
-                return random.nextDouble() < 0.20;
-            }
+            case 81 -> totalMines = (int) (totalSquares * 0.10);
+            // Expert ger 18%
+            case 480 -> totalMines = (int) (totalSquares * 0.18);
             // Default och intermediate ger 13%
-            default -> {
-                return random.nextDouble() < 0.13;
+            default -> totalMines = (int) (totalSquares * 0.13);
+        }
+        int minesCreated = 0;
+        while (minesCreated < totalMines) {
+            int row = random.nextInt(gameBoard.length);
+            int col = random.nextInt(gameBoard[row].length);
+            Square square = gameBoard[row][col];
+            if (square.isHasMine() || (row == rowClicked && col == colClicked)) {
+                continue;
             }
+            square.setHasMine();
+            minesCreated += 1;
         }
     }
 
