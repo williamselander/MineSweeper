@@ -161,7 +161,7 @@ public class BoardView extends VBox {
         MenuItem secondHelp = new MenuItem("2. Rutor med siffror har så många minor runt sig");
         MenuItem thirdHelp = new MenuItem("3. Flagga rutorna som du tror har en mina med högerklick");
         MenuItem fourthHelp = new MenuItem("4. Ifall du klickar på en ruta med mina eller att tiden går ut har du förlorat ");
-        MenuItem fifthHelp = new MenuItem("5. Du har vunnit när alla rutor förutom dom flaggade är klickade,\n och du har markerat rätt rutor med minor. Smileyn kommer bli cool");
+        MenuItem fifthHelp = new MenuItem("5. Du har vunnit när alla rutor utom minor har öppnats,\n Smileyn kommer bli cool!");
         MenuItem lastHelp = new MenuItem("6. Starta om spelet antingen i Game eller genom att klicka på smileyn");
         help.getItems().addAll(
                 firsHelp,
