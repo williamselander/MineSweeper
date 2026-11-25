@@ -9,7 +9,11 @@ public class Controller {
     private Board board;
 
     public Controller(){
-        this.boardView = new BoardView(this::handleSquareClick, this::handleFlagClick, this::handleRestartGame, this::handleLoss);
+        this.boardView = new BoardView(
+                this::handleSquareClick,
+                this::handleFlagClick,
+                this::handleRestartGame,
+                this::handleLoss);
     }
 
     private void startGame(int row, int col, int rows, int cols){

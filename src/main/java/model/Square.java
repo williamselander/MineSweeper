@@ -20,22 +20,22 @@ public class Square {
         this.blown = false;
     }
 
-    public void setAsOpen(){
+    void setAsOpen(){
         this.isOpen = true;
     }
 
-    public void toggleFlag(){
+    void toggleFlag(){
         if (isOpen) {
             return;
         }
         this.isFlagged = !isFlagged;
     }
 
-    public void setHasMine(){
+    void setHasMine(){
         this.hasMine = true;
     }
 
-    public void setAsBlown(){
+    void setAsBlown(){
         this.blown = true;
     }
 
@@ -43,15 +43,15 @@ public class Square {
         return this.blown;
     }
 
-    public void setMinesAround(int minesAround) {
+    void setMinesAround(int minesAround) {
         this.minesAround = minesAround;
     }
 
-    public int getRow() {
+    int getRow() {
         return row;
     }
 
-    public int getCol() {
+    int getCol() {
         return col;
     }
 

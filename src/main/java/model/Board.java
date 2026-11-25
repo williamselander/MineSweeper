@@ -69,7 +69,13 @@ public class Board {
         }
     }
 
-    public Square[][] getBoard(){return gameBoard.clone();}
+    public Square[][] getBoard(){
+        Square[][] copy = gameBoard.clone();
+        for (int i = 0; i < gameBoard.length; i++) {
+            copy[i] = gameBoard[i].clone();
+        }
+        return copy;
+    }
 
     private void setMinesAround(){
         for (int row = 0; row < gameBoard.length ; row++) {
@@ -80,7 +86,7 @@ public class Board {
         }
     }
 
-    private Long findMinesAround(List<Square> adjacentSquares) {
+    private long findMinesAround(List<Square> adjacentSquares) {
         return adjacentSquares.stream().filter(Square::hasMine).count();
     }
 

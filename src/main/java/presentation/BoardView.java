@@ -431,7 +431,7 @@ public class BoardView extends VBox {
                 square.setCursor(Cursor.HAND);
 
                 square.setOnMouseClicked(event -> {
-                    if (gameStatus == GameStatus.LOST) {
+                    if (gameStatus == GameStatus.LOST || gameStatus == GameStatus.WON) {
                         return;
                     }
                     // Om ej flagga klickat
