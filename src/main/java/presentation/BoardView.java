@@ -207,7 +207,7 @@ public class BoardView extends VBox {
     private void renderSquareAfterLoss(Square square, int row, int col){
         if (square.isBlown()) {
             setSquareAsBlown(squareViews[row][col]);
-        } else if (square.isHasMine()) {
+        } else if (square.hasMine()) {
             setSquareAsMine(squareViews[row][col]);
         } else if (square.isOpen()) {
             setSquareClickedStyle(squareViews[row][col], square.getMinesAround());
@@ -216,9 +216,9 @@ public class BoardView extends VBox {
 
     private void renderSquareDuringGame(Square square, int row, int col) {
         if (square.isFlagged()) {
-            squareViews[row][col].getStyleClass().addAll("square-with-flag");
+            squareViews[row][col].getStyleClass().setAll("square-with-flag");
         } else if (square.isOpen()) {
-            if (square.isHasMine()) {
+            if (square.hasMine()) {
                 setSquareWithMineStyle(squareViews[row][col]);
             } else {
                 setSquareClickedStyle(squareViews[row][col], square.getMinesAround());
@@ -377,7 +377,7 @@ public class BoardView extends VBox {
     }
 
     private void resetBoardView(){
-        updateCounter("0");
+        updateCounter("33");
         timeline.stop();
         timeline.getKeyFrames().clear();
         timerStarted = false;
@@ -393,17 +393,19 @@ public class BoardView extends VBox {
                 this.rowsBoard = 9;
                 this.colsBoard = 9;
                 setMaxSeconds(300);
+                updateCounter("8");
             }
             case "Expert" -> {
                 this.rowsBoard = 16;
                 this.colsBoard = 30;
                 setMaxSeconds(420);
+                updateCounter("86");
             }
-            // Default 16*16
             default -> {
                 this.rowsBoard = 16;
                 this.colsBoard = 16;
                 setMaxSeconds(300);
+                updateCounter("33");
             }
         }
     }

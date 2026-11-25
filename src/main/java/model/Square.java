@@ -24,7 +24,7 @@ public class Square {
         this.isOpen = true;
     }
 
-    public void setFlagged(){
+    public void toggleFlag(){
         if (isOpen) {
             return;
         }
@@ -55,7 +55,7 @@ public class Square {
         return col;
     }
 
-    public boolean isHasMine() {
+    public boolean hasMine() {
         return hasMine;
     }
 

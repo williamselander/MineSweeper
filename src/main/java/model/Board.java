@@ -16,11 +16,11 @@ public class Board {
         this.gameBoard = gameBoard;
     }
 
-    public void setStatusAsNotStarted(){
+    private void setStatusAsNotStarted(){
         this.status = GameStatus.NOT_STARTED;
     }
 
-    public void setStatusAsWon(){
+    private void setStatusAsWon(){
         this.status = GameStatus.WON;
     }
 
@@ -28,7 +28,7 @@ public class Board {
         this.status = GameStatus.LOST;
     }
 
-    public void setStatusAsActive(){
+    private void setStatusAsActive(){
         this.status = GameStatus.ACTIVE;
     }
 
@@ -40,14 +40,14 @@ public class Board {
         return status;
     }
 
-    public void hasPlayerWon(){
+    public void checkWinCondition(){
         // ifall totala rutor - antalet minor = opened squares har man vunnit.
         if (getTotalSquares() - getTotalMines() == openedSquares && !getStatus().equals(GameStatus.LOST)) {
             setStatusAsWon();
         }
     }
 
-    public void setAsBlown(int row, int col) {
+    private void setAsBlown(int row, int col) {
         gameBoard[row][col].setAsBlown();
         setStatusAsLost();
     }
@@ -81,7 +81,7 @@ public class Board {
     }
 
     private Long findMinesAround(List<Square> adjacentSquares) {
-        return adjacentSquares.stream().filter(Square::isHasMine).count();
+        return adjacentSquares.stream().filter(Square::hasMine).count();
     }
 
     private List<Square> getAdjacentSquares(int row, int col){
@@ -109,7 +109,7 @@ public class Board {
         int totalSquares = getTotalSquares();
         int totalMines;
         switch (totalSquares) {
-            // Beginner ger 10 % för mina
+            // Beginner ger 10 % minor
             case 81 -> totalMines = (int) (totalSquares * 0.10);
             // Expert ger 18%
             case 480 -> totalMines = (int) (totalSquares * 0.18);
@@ -121,7 +121,7 @@ public class Board {
             int row = random.nextInt(gameBoard.length);
             int col = random.nextInt(gameBoard[row].length);
             Square square = gameBoard[row][col];
-            if (square.isHasMine() || (row == rowClicked && col == colClicked)) {
+            if (square.hasMine() || (row == rowClicked && col == colClicked)) {
                 continue;
             }
             square.setHasMine();
@@ -143,7 +143,7 @@ public class Board {
         square.setAsOpen();
         openedSquares++;
 
-        if (square.isHasMine()) {
+        if (square.hasMine()) {
             setAsBlown(row, col);
             return;
         }
@@ -158,11 +158,11 @@ public class Board {
     }
 
 
-    public int getTotalMines(){
+    private int getTotalMines(){
         int totalMines = 0;
         for (Square[] row: gameBoard) {
             for (Square col: row) {
-                if (col.isHasMine()) {
+                if (col.hasMine()) {
                     totalMines++;
                 }
             }
@@ -195,6 +195,6 @@ public class Board {
                 return;
             }
         Square square = gameBoard[row][col];
-        square.setFlagged();
+        square.toggleFlag();
     }
 }

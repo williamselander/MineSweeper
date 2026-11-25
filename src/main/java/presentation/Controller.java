@@ -23,7 +23,7 @@ public class Controller {
             );
         }
         board.reveal(row, col);
-        board.hasPlayerWon();
+        board.checkWinCondition();
         boardView.updateBoard(board.getBoard(), board.getStatus(), board.getTotalMinesForCounter());
         }
 
