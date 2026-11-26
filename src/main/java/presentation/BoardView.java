@@ -192,14 +192,14 @@ public class BoardView extends VBox {
             default -> updateCounter(String.valueOf(totalMines));
 
         }
-        if (gameStatus == GameStatus.ACTIVE) {
-            createHappySmiley();
-        } else {
-            createSadSmiley();
-        }
-        if (gameStatus == GameStatus.WON) {
-            createWinSmiley();
-        }
+        switch (gameStatus) {
+            case GameStatus.ACTIVE -> createHappySmiley();
+
+            case GameStatus.WON -> createWinSmiley();
+
+            default -> createSadSmiley();
+            }
+
         //Loopa igenom nya board
         loopThroughBoard(board);
     }

@@ -192,7 +192,6 @@ public class Board {
         return totalFlagged;
     }
 
-
     public void flagSquare(int row, int col) {
         if (getStatus() != GameStatus.ACTIVE) {
             return;

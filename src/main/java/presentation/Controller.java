@@ -51,8 +51,4 @@ public class Controller {
 
     public BoardView getBoardView(){return boardView;}
 
-
-
-
-
 }
